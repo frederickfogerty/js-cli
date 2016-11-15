@@ -1,0 +1,20 @@
+
+machine:
+  node:
+    version: 6
+
+
+dependencies:
+  cache_directories:
+    - "~/.yarn-cache"
+
+  override:
+    - which node
+    - npm i -g yarn
+    - yarn install
+
+test:
+  override:
+    - node -v
+    - npm run lint
+    - npm run test:unit

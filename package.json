@@ -1,0 +1,63 @@
+{
+  "name": "@fredfogerty/js-util",
+  "version": "0.0.1",
+  "description": "An opinionated javascript command line tool",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc && babel dist -d dist",
+    "build:watch": "tsc -w",
+    "lint": "tslint 'src/**/*.ts{,x}' --type-check --format verbose",
+    "prepublish": "npm run build",
+    "np": "ynp",
+    "test": "npm run test:unit && npm run lint",
+    "test:unit": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frederickfogerty/ts-boilerplate.git"
+  },
+  "author": "Frederick Fogerty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/frederickfogerty/ts-boilerplate/issues"
+  },
+  "homepage": "https://github.com/frederickfogerty/ts-boilerplate#readme",
+  "devDependencies": {
+    "@types/jest": "^15.1.32",
+    "babel-cli": "^6.18.0",
+    "babel-core": "^6.18.0",
+    "babel-preset-node6": "^11.0.0",
+    "jest": "^16.0.2",
+    "ts-jest": "^0.1.11",
+    "tslint": "^3.15.1",
+    "tslint-config-xo": "^0.2.0",
+    "typescript": "^2.0.6",
+    "ynp": "^2.9.0"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+    "testPathDirs": [
+      "src"
+    ],
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  },
+  "dependencies": {
+    "@types/bluebird": "^3.0.35",
+    "@types/fs-extra-promise": "^0.0.30",
+    "@types/node": "^6.0.47",
+    "bluebird": "^3.4.6",
+    "command-interface": "^2.3.0",
+    "fs-extra-promise": "^0.4.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "j": "index.js"
+  }
+}
