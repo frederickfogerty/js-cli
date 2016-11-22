@@ -1,0 +1,160 @@
+import {
+	R,
+	printTitle,
+	log,
+	constants,
+	deps,
+	fs,
+	fsPath,
+	time,
+	isFuzzyMatch,
+	moment,
+	config,
+} from '../../common';
+import * as Rsync from 'rsync';
+
+
+export const group = 'dev';
+export const name = 'sync:libs';
+export const alias = 'sl';
+export const description = 'Copies local libs to dependent modules.';
+export const args = {
+	'[module names]': 'Optional names of libs to include. Default: all',
+};
+
+
+export async function cmd(
+	args: {
+		params: string[],
+		options: {}
+	}
+) {
+
+	// Setup initial conditions.
+	const startedAt = time.timer();
+	const params = args.params || [];
+	printTitle('Sync Libs');
+
+	const canCopy = (pkg: constants.IPackageObject) => {
+		// Don't copy simply configuration modules (like 'babel' or 'typescript')
+		// that do not have lib output.
+		const hasFolder = (folder: string) => fs.existsSync(fsPath.join(pkg.path, folder));
+		return hasFolder('src') || hasFolder('pages');
+	};
+
+	const localDependencies = (pkg: constants.IPackage): Array<constants.IPackageObject> => {
+		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter(name => name.startsWith(config.ORG_NAME));
+		return constants.MODULE_DIRS
+			.toPackageObjects()
+			.filter(item => item.name !== pkg.name)
+			.filter(item => R.contains(item.name, dependencies))
+			.filter(item => canCopy(item));
+	};
+
+	const includeModule = (moduleName: string): boolean => {
+		if (params.length === 0) { return true; }
+		return R.any(pattern => isFuzzyMatch(pattern, moduleName), params);
+	};
+
+	const dependencyOrder = deps
+		.orderByDepth(constants.MODULE_DIRS.toPackageObjects())
+		.filter(item => includeModule(item.name))
+		.map(item => ({
+			name: item.name,
+			path: item.path,
+			localDependencies: localDependencies(item.package),
+			package: item,
+		}))
+		.filter(item => item.localDependencies.length > 0);
+
+	// Copy local dependencies into each module.
+	for (const target of dependencyOrder) {
+		log.info.gray(`Update ${log.magenta(target.name)}`);
+		for (const source of target.localDependencies) {
+			log.info.gray(`  with - ${log.blue(source.name)}`);
+			await copyModule(source, target);
+			syncPackageVersion(source, target.package);
+		}
+		log.info();
+	}
+
+	// Finish up.
+	const elapsed = startedAt.elapsed();
+	const timeStamp = moment().format('h:mm:ssa');
+	log.info.green(`Synced ${dependencyOrder.length} modules in ${elapsed} ${log.gray(timeStamp)}`);
+}
+
+
+
+interface IRsyncResult {
+	err: Error;
+	code: number;
+	cmd: string;
+}
+
+
+function rsyncExecute(rsync: any): Promise<IRsyncResult> {
+	return new Promise<IRsyncResult>((resolve, reject) => {
+		rsync.execute((err: Error, code: number, cmd: string) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve({ err, code, cmd });
+			}
+		});
+	});
+}
+
+
+
+async function copyModule(
+	from: { name: string, path: string },
+	to: { name: string, path: string }
+) {
+	const IGNORE = [
+		'node_modules',
+		'typings',
+		'src',
+		'.DS_Store',
+		'.babelrc',
+		'.tmp',
+		'.npmignore',
+		'tsconfig.json',
+		'tslint.json',
+		'typings.json',
+	];
+	const FROM_DIR = fsPath.join(from.path, '/');
+	const TO_DIR = fsPath.join(to.path, 'node_modules', from.name, '/');
+	fs.ensureDirSync(TO_DIR);
+
+	const rsync = new Rsync()
+		.source(FROM_DIR)
+		.destination(TO_DIR)
+		.exclude(IGNORE)
+		.delete()
+		.flags('aW');
+	await rsyncExecute(rsync);
+}
+
+
+/**
+ * Updates the dependency version of the target with the given source package.
+ */
+function syncPackageVersion(source: constants.IPackageObject, target: constants.IPackageObject): boolean {
+	// Setup initial conditions.
+	const sourceVersion = source.package.version;
+	const targetVersion = (target.package.dependencies as any)[ source.name ];
+	if (targetVersion === sourceVersion) { return false; }
+
+	// Update the version on the target package.
+	const targetPackage = R.clone(target.package);
+	(targetPackage.dependencies as any)[ source.name ] = sourceVersion;
+
+	// Save the package.json file.
+	const path = fsPath.join(target.path, 'package.json');
+	const json = JSON.stringify(targetPackage, null, '  ');
+	fs.outputFileSync(path, `${json}\n`);
+
+	// Finish up.
+	return true;
+}
