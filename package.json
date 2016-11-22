@@ -9,7 +9,7 @@
 		"lint": "tslint 'src/**/*.ts{,x}' --type-check --format verbose",
 		"prepublish": "npm run build",
 		"np": "ynp",
-		"test": "npm run test:unit && npm run lint",
+		"test": "npm run lint",
 		"test:unit": "jest"
 	},
 	"repository": {
