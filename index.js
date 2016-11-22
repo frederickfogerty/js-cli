@@ -1,2 +1,7 @@
 #!/usr/bin/env node
-require('./dist/index.js');
+process.env.TS_NODE_FAST = true;
+
+require("ts-babel-node/register");
+require("babel-polyfill");
+
+require("./src/index.ts");
