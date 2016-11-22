@@ -7,7 +7,6 @@
 		"build": "rm -rf dist && tsc && babel dist -d dist",
 		"build:watch": "tsc -w",
 		"lint": "tslint 'src/**/*.ts{,x}' --type-check --format verbose",
-		"prepublish": "npm run build",
 		"np": "ynp",
 		"test": "npm run lint",
 		"test:unit": "jest"
