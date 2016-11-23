@@ -107,6 +107,10 @@
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-0.0.29.tgz#fbcfd330573b912ef59eeee14602bface630754b"
 
+"@types/minimist@^1.1.29":
+  version "1.1.29"
+  resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.1.29.tgz#91cd01c4f28c18c8a4e621aad803a3608d81cfea"
+
 "@types/node-fetch":
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-1.6.5.tgz#baf417fd32f68ae8fec670532eb4a5b71bb09ab6"
