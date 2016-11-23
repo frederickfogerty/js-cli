@@ -1,6 +1,4 @@
 import * as path from 'path';
-import * as fs from 'fs';
-import { loadavg } from 'os';
 import { log } from './common/util/log';
 
 
