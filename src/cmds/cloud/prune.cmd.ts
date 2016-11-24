@@ -6,6 +6,7 @@ import {
 	time,
 	prompt,
 	pluralize,
+	Listr
 } from '../../common';
 import { IDeployment, IAlias, http } from './common';
 
@@ -60,7 +61,7 @@ export async function cmdDisable(
 	list = R.sortBy(R.prop('name'), list);
 
 	// List out what is about to be removed.
-	const tasks: IListrTask[] = [];
+	const tasks: Listr.IListrTask[] = [];
 	let currentName = '';
 	list.forEach(deployment => {
 		const { name, url, uid } = deployment;

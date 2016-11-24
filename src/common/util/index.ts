@@ -18,9 +18,10 @@ export { moment, pluralize, constants }
 
 
 
-export function listr(tasks?: IListrTask[], options?: IListrOptions) {
+export function listr(tasks?: Listr.IListrTask[], options?: Listr.IListrOptions): Listr {
 	return new Listr(tasks, options);
 }
+export { Listr }
 
 
 /**
@@ -51,5 +52,5 @@ export function printTitle(title: string, ) {
  * Determine if a word loosley matches the given pattern.
  */
 export function isFuzzyMatch(pattern: string, value: string): boolean {
-	return fuzzy.filter(pattern, [ value ]).length > 0;
+	return fuzzy.filter(pattern, [value]).length > 0;
 }
