@@ -3,8 +3,10 @@ import {
 	execAsync,
 	exec,
 	exec$,
+	execa,
 	fsPath,
 	listr,
+	Listr
 } from './util';
 import * as deps from './deps';
 export { exec, execAsync, exec$ }
@@ -23,16 +25,16 @@ export interface IExecOnModulesOptions {
 /**
  * Executes the given command on a set of modules.
  */
-export async function execOn(
+export function execOn(
 
 	modules: Array<constants.IPackageObject>,
 	command: string,
 	options?: IExecOnModulesOptions,
 
-): Promise<IExecOnModulesResult> {
+): { listr: Listr, results: IExecOnModulesResult } {
 
 	// Setup initial conditions.
-	const config = options || {};
+	const config = options || { isConcurrent: true };
 	const results = {
 		success: [] as Array<constants.IPackageObject>,
 		failed: [] as Array<constants.IPackageObject>,
@@ -42,23 +44,30 @@ export async function execOn(
 	modules = deps.orderByDepth(modules);
 
 	const runTask = async (pkg: constants.IPackageObject) => {
-		const cmd = `cd ${pkg.path} && ${command}`;
-		const err = new Error(`Failed while running '${command}' on '${pkg.name}'.`);
-		try {
-			let execResult = { code: 0 };
-			if (!config.isTest) {
-				execResult = await execAsync(cmd, { silent: true });
-			}
-			if (execResult.code === 0) {
-				results.success.push(pkg);
-			} else {
-				results.failed.push(pkg);
-				throw err;
-			}
-		} catch (error) {
-			results.failed.push(pkg);
-			throw err;
+		const commands = command.split(' ');
+		const file = commands[0];
+		const args = commands.slice(1);
+		const cmd = `${pkg.path} && ${command}`;
+		// const err = new Error(`Failed while running '${command}' on '${pkg.name}'.`);
+		if (!config.isTest) {
+			// console.log(file, args);
+
+			return execa(file, args, { cwd: pkg.path });
+			// execResult = await execAsync(cmd, { silent: true });
 		}
+		return 'TEST';
+		// try {
+		// 	// let execResult = { code: 0 };
+		// 	// if (execResult.code === 0) {
+		// 	// 	results.success.push(pkg);
+		// 	// } else {
+		// 	// 	results.failed.push(pkg);
+		// 	// 	throw err;
+		// 	// }
+		// } catch (error) {
+		// 	results.failed.push(pkg);
+		// 	// throw err;
+		// }
 	};
 
 	// Run the command on each module.
@@ -66,15 +75,34 @@ export async function execOn(
 		title: pkg.name,
 		task: () => runTask(pkg),
 	}));
-	const taskList = listr(tasks, { concurrent: config.isConcurrent });
-	try {
-		await taskList.run();
-	} catch (error) {
-		// Ignore - the calling code will handle the error.
-	}
+	return {
+		listr: listr(tasks, { concurrent: config.isConcurrent }),
+		results
+	};
 
-	// Finish up.
-	return results;
+}
+
+
+/**
+ * Runs the command on a subset of the modules passed which have the command specified in their package.json.
+ * E.g. if the script is 'build', modules which don't have a "build" script defined will not be executed.
+ */
+export function execOnIfScriptExists(
+
+	modules: Array<constants.IPackageObject>,
+	script: string,
+	options: IExecOnModulesOptions = { isConcurrent: true, isTest: false },
+
+) {
+	const filteredModules = modules.filter(pkg => pkg.hasScript(script));
+	console.log('modules', modules);
+	console.log('filteredModules', filteredModules);
+	console.log('script', script);
+	return execOn(
+		filteredModules,
+		`yarn run ${script}`,
+		{ isConcurrent: options.isConcurrent, isTest: options.isTest }
+	);
 }
 
 

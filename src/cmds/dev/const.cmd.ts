@@ -2,6 +2,7 @@ import * as common from '../../common';
 const { R, log, constants, config } = common;
 
 
+export const name = 'const';
 export const group = 'dev';
 export const description = 'Lists the constants for the project.';
 
