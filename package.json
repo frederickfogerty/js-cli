@@ -62,6 +62,7 @@
     "chokidar": "^1.6.1",
     "command-interface": "^2.4.0",
     "dotenv": "^2.0.0",
+    "execa": "^0.5.0",
     "express": "^4.14.0",
     "filesize": "^3.3.0",
     "fs-extra-promise": "^0.4.1",
