@@ -1,3 +1,4 @@
+import { listr } from '../../common/util';
 import {
 	R,
 	printTitle,
@@ -29,17 +30,29 @@ export async function cmd(
 		options: {}
 	}
 ) {
-
-	// Setup initial conditions.
 	const startedAt = time.timer();
-	const params = args.params || [];
-	printTitle('Sync Libs');
+	const { length, syncListr } = createPackageSyncListr(args);
+	await syncListr.run();
+	const elapsed = startedAt.elapsed();
+	const timeStamp = moment().format('h:mm:ssa');
+	log.info.green(`Synced ${length} modules in ${elapsed} ${log.gray(timeStamp)}`);
+}
+
+
+export function createPackageSyncListr(args?: {
+	params: string[],
+	options: {}
+}) {
+	// Setup initial conditions.
+	const params = (args && args.params) || [];
+	// printTitle('Sync Libs');
 
 	const canCopy = (pkg: constants.IPackageObject) => {
 		// Don't copy simply configuration modules (like 'babel' or 'typescript')
 		// that do not have lib output.
 		const hasFolder = (folder: string) => fs.existsSync(fsPath.join(pkg.path, folder));
-		return hasFolder('src') || hasFolder('pages');
+		return true;
+		// return hasFolder('src') || hasFolder('pages');
 	};
 
 	const localDependencies = (pkg: constants.IPackage): Array<constants.IPackageObject> => {
@@ -68,20 +81,30 @@ export async function cmd(
 		.filter(item => item.localDependencies.length > 0);
 
 	// Copy local dependencies into each module.
-	for (const target of dependencyOrder) {
-		log.info.gray(`Update ${log.magenta(target.name)}`);
-		for (const source of target.localDependencies) {
-			log.info.gray(`  with - ${log.blue(source.name)}`);
-			await copyModule(source, target);
-			syncPackageVersion(source, target.package);
-		}
-		log.info();
-	}
+	const tasks = dependencyOrder.map(target => {
+		const targetName = log.magenta(target.name);
+		const sourceNames = target.localDependencies.map(source => log.blue(source.name)).join(log.blue(', '));
+		const title = `Update ${targetName} with ${sourceNames}`;
+
+		const task = async () => {
+			await Promise.all(target.localDependencies.map(async (source) => {
+				await copyModule(source, target);
+				syncPackageVersion(source, target.package);
+			}));
+		};
+
+		return {
+			title,
+			task
+		};
+	});
+
 
 	// Finish up.
-	const elapsed = startedAt.elapsed();
-	const timeStamp = moment().format('h:mm:ssa');
-	log.info.green(`Synced ${dependencyOrder.length} modules in ${elapsed} ${log.gray(timeStamp)}`);
+	return {
+		length: dependencyOrder.length,
+		syncListr: listr(tasks),
+	};
 }
 
 
@@ -143,12 +166,12 @@ async function copyModule(
 function syncPackageVersion(source: constants.IPackageObject, target: constants.IPackageObject): boolean {
 	// Setup initial conditions.
 	const sourceVersion = source.package.version;
-	const targetVersion = (target.package.dependencies as any)[ source.name ];
+	const targetVersion = (target.package.dependencies as any)[source.name];
 	if (targetVersion === sourceVersion) { return false; }
 
 	// Update the version on the target package.
 	const targetPackage = R.clone(target.package);
-	(targetPackage.dependencies as any)[ source.name ] = sourceVersion;
+	(targetPackage.dependencies as any)[source.name] = sourceVersion;
 
 	// Save the package.json file.
 	const path = fsPath.join(target.path, 'package.json');
