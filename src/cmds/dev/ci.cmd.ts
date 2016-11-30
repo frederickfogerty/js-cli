@@ -1,4 +1,4 @@
-import { MODULE_DIRS } from '../../common/constants';
+import { LIB_MODULE_DIRS, MODULE_DIRS } from '../../common/constants';
 import { R, run, constants, log, printTitle, time, listr } from '../../common';
 import { createPackageSyncListr } from './sync-libs.cmd';
 
@@ -31,7 +31,7 @@ export async function cmd(args: {
 	const installTask = () => run.execOn(modules, `yarn`).listr;
 
 	// Run a build and sync
-	const buildTask = () => run.execOnIfScriptExists(modules, `build`).listr;
+	const buildTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
 	const syncTask = () => createPackageSyncListr().syncListr;
 
 	const lintTask = () => run.execOnIfScriptExists(modules, `lint`).listr;
