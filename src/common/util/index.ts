@@ -5,6 +5,7 @@ export { IResponse, IHttpHeaders } from './http'
 export { env, http }
 export { log } from './log'
 export * from './exec'
+export * from './execa'
 export * from './libs'
 
 import * as moment from 'moment';
@@ -19,7 +20,7 @@ export { moment, pluralize, constants }
 
 
 export function listr(tasks?: Listr.IListrTask[], options?: Listr.IListrOptions): Listr {
-	return new Listr(tasks, options);
+    return new Listr(tasks, options);
 }
 export { Listr }
 
@@ -29,7 +30,7 @@ export { Listr }
  * Helpful for making more readable display output.
  */
 export function projectPath(path: string) {
-	return path.substr(constants.ROOT_DIR.length, path.length);
+    return path.substr(constants.ROOT_DIR.length, path.length);
 }
 
 
@@ -38,7 +39,7 @@ export function projectPath(path: string) {
  * Common styling for a command title.
  */
 export function printTitle(title: string, ) {
-	log.info.cyan(`
+    log.info.cyan(`
 -----------------------------------------------------------------------------------------
  ${title}
 -----------------------------------------------------------------------------------------`);
@@ -52,5 +53,5 @@ export function printTitle(title: string, ) {
  * Determine if a word loosley matches the given pattern.
  */
 export function isFuzzyMatch(pattern: string, value: string): boolean {
-	return fuzzy.filter(pattern, [value]).length > 0;
+    return fuzzy.filter(pattern, [value]).length > 0;
 }
