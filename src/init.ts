@@ -5,6 +5,7 @@ import { log } from './common/util/log';
 // NOTE: event name is camelCase as per node convention
 process.on('unhandledRejection', function (reason: Error, promise: Promise<any>) {
 	log.error(reason);
+	process.exit(420);
 });
 
 import * as common from './common';
