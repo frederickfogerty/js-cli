@@ -68,7 +68,7 @@ export async function cmd(args: {
 		...buildTasks,
 		{ title: 'Lint', task: lintTask },
 		{ title: 'Test', task: testTask },
-		...deployTasks,
+		// ...deployTasks,
 	];
 
 	await listr(tasks).run();
