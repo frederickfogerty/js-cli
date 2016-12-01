@@ -1,3 +1,4 @@
+import { execaCommand } from './util/execa';
 import {
 	constants,
 	execAsync,
@@ -44,30 +45,10 @@ export function execOn(
 	modules = deps.orderByDepth(modules);
 
 	const runTask = async (pkg: constants.IPackageObject) => {
-		const commands = command.split(' ');
-		const file = commands[0];
-		const args = commands.slice(1);
-		const cmd = `${pkg.path} && ${command}`;
-		// const err = new Error(`Failed while running '${command}' on '${pkg.name}'.`);
 		if (!config.isTest) {
-			// console.log(file, args);
-
-			return execa(file, args, { cwd: pkg.path });
-			// execResult = await execAsync(cmd, { silent: true });
+			return execaCommand(command, { cwd: pkg.path });
 		}
 		return 'TEST';
-		// try {
-		// 	// let execResult = { code: 0 };
-		// 	// if (execResult.code === 0) {
-		// 	// 	results.success.push(pkg);
-		// 	// } else {
-		// 	// 	results.failed.push(pkg);
-		// 	// 	throw err;
-		// 	// }
-		// } catch (error) {
-		// 	results.failed.push(pkg);
-		// 	// throw err;
-		// }
 	};
 
 	// Run the command on each module.
