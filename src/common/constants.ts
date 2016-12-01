@@ -100,3 +100,6 @@ export function findModule(name: string): IPackageObject | undefined {
 
 export const CURRENT_BRANCH = process.env.CURRENT_BRANCH;
 export const IS_MAIN_BRANCH = config.MAIN_BRANCHES.includes(CURRENT_BRANCH);
+
+
+export const IS_TTY = (process.stdout as any).isTTY;

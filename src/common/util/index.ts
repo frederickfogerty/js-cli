@@ -1,3 +1,4 @@
+import { IS_TTY } from '../constants';
 import * as env from './env';
 import http from './http';
 export { IResponse, IHttpHeaders } from './http'
@@ -20,7 +21,7 @@ export { moment, pluralize, constants }
 
 
 export function listr(tasks?: Listr.IListrTask[], options: Listr.IListrOptions = {}): Listr {
-	if (typeof options.renderer === 'undefined') options.renderer = (process.stdout as any).isTTY ? 'update' : 'verbose'
+	if (typeof options.renderer === 'undefined') options.renderer = IS_TTY ? 'update' : 'verbose'
 	return new Listr(tasks, options);
 }
 export { Listr }
