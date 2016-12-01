@@ -11,11 +11,13 @@ export const args = {
 	// '[script]': 'The name of the NPM script to run',
 	// '--test, -t': 'Flag indicating if a test run should be performed (default: false).',
 	'--yolo, -y': `Don't clean and install fresh deps`,
+	'--fast': `Install dependencies concurrently (doesn't work on CI)`,
 };
 
 export async function cmd(args: {
 	params: string[],
 	options: {
+		fast?: boolean,
 		yolo?: boolean
 	}
 }) {
@@ -28,7 +30,7 @@ export async function cmd(args: {
 	const removeTask = () => run.execOn(currentModules, `rm -rf node_modules`).listr;
 
 	// Install in all modules
-	const installTask = () => run.execOn(currentModules, `yarn`, { isConcurrent: false }).listr;
+	const installTask = () => run.execOn(currentModules, `yarn`, { isConcurrent: args.options.fast }).listr;
 
 	// Run a build and sync
 	const buildLibsTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
