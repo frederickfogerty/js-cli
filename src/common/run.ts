@@ -95,9 +95,6 @@ export function execOnIfScriptExists(
 
 ) {
 	const filteredModules = modules.filter(pkg => pkg.hasScript(script));
-	console.log('modules', modules);
-	console.log('filteredModules', filteredModules);
-	console.log('script', script);
 	return execOn(
 		filteredModules,
 		`yarn run ${script}`,
