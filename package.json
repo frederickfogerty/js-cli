@@ -1,6 +1,6 @@
 {
   "name": "@fredfogerty/js-cli",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "An opinionated javascript command line tool",
   "main": "index.js",
   "scripts": {
