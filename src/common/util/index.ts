@@ -20,7 +20,7 @@ export { moment, pluralize, constants }
 
 
 export function listr(tasks?: Listr.IListrTask[], options: Listr.IListrOptions = {}): Listr {
-	if (typeof options.renderer === 'undefined') options.renderer = (process as any).isTTY ? 'update' : 'verbose'
+	if (typeof options.renderer === 'undefined') options.renderer = (process.stdout as any).isTTY ? 'update' : 'verbose'
 	return new Listr(tasks, options);
 }
 export { Listr }
