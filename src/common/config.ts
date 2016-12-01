@@ -42,6 +42,7 @@ const config = {
 	ENV_FILES: [],
 	NOW_TOKEN: '',
 	MAIN_BRANCHES: ['master', 'dev'],
+	AUTO_DEPLOY: true,
 };
 
 export default config;

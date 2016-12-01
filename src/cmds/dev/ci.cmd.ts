@@ -58,7 +58,7 @@ export async function cmd(args: {
 		]
 
 	// Only deploy automatically on CI
-	const shouldDeploy = process.env.CI // && IS_MAIN_BRANCH
+	const shouldDeploy = config.AUTO_DEPLOY && process.env.CI && IS_MAIN_BRANCH
 	const deployTasks = shouldDeploy
 		? [{ title: 'Deploy', task: () => deployPackages(SERVICE_MODULE_DIRS.toPackageObjects()) }]
 		: []
@@ -68,7 +68,7 @@ export async function cmd(args: {
 		...buildTasks,
 		{ title: 'Lint', task: lintTask },
 		{ title: 'Test', task: testTask },
-		// ...deployTasks,
+		...deployTasks,
 	];
 
 	await listr(tasks).run();
