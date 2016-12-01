@@ -41,6 +41,7 @@ const config = {
 	USE_YARN: true,
 	ENV_FILES: [],
 	NOW_TOKEN: '',
+	MAIN_BRANCHES: ['master', 'dev'],
 };
 
 export default config;
@@ -60,7 +61,6 @@ export async function init() {
 			// It's not an absolute path, create the directory
 			envFile = path.resolve(config.ROOT_DIR, envFile);
 		}
-		console.log('envFile', envFile);
 		dotenv.config({ path: envFile });
 	});
 }

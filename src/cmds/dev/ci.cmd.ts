@@ -1,6 +1,7 @@
-import { LIB_MODULE_DIRS, MODULE_DIRS, SERVICE_MODULE_DIRS } from '../../common/constants';
-import { R, run, constants, log, printTitle, time, listr } from '../../common';
+import { IS_MAIN_BRANCH, LIB_MODULE_DIRS, MODULE_DIRS, SERVICE_MODULE_DIRS } from '../../common/constants';
+import { R, run, config, constants, log, printTitle, time, listr } from '../../common';
 import { createPackageSyncListr } from './sync-libs.cmd';
+import { deployPackages } from '../cloud/deploy.cmd';
 
 export const name = 'ci';
 export const group = 'dev';
@@ -21,37 +22,51 @@ export async function cmd(args: {
 	// Setup initial conditions.
 	const startedAt = time.timer();
 
-
-	const modules = MODULE_DIRS.toPackageObjects();
+	const currentModules = (IS_MAIN_BRANCH ? SERVICE_MODULE_DIRS : MODULE_DIRS).toPackageObjects();
 
 	// Remove all node_modules
-	const removeTask = () => run.execOn(modules, `rm -rf node_modules`).listr;
+	const removeTask = () => run.execOn(currentModules, `rm -rf node_modules`).listr;
 
 	// Install in all modules
-	const installTask = () => run.execOn(modules, `yarn`, { isConcurrent: false }).listr;
+	const installTask = () => run.execOn(currentModules, `yarn`, { isConcurrent: false }).listr;
 
 	// Run a build and sync
 	const buildLibsTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
 	const syncTask = () => createPackageSyncListr().syncListr;
 
-	const buildServicesTask = () => run.execOnIfScriptExists(SERVICE_MODULE_DIRS.toPackageObjects(), `build`).listr;
-	const lintTask = () => run.execOnIfScriptExists(modules, `lint`).listr;
-	const testTask = () => run.execOnIfScriptExists(modules, `test`).listr;
+	const buildTask = () => run.execOnIfScriptExists(currentModules, `build`).listr;
+	const lintTask = () => run.execOnIfScriptExists(currentModules, `lint`).listr;
+	const testTask = () => run.execOnIfScriptExists(currentModules, `test`).listr;
+
+
+	const preTaks = !args.options.yolo
+		? [
+			{ title: 'Clean', task: removeTask },
+			{ title: 'Install', task: installTask },
+		]
+		: []
+
+
+	const buildTasks = IS_MAIN_BRANCH
+		? [{ title: 'Build Services', task: buildTask }]
+		: [
+			{ title: 'Build Libs', task: buildLibsTask },
+			{ title: 'Sync', task: syncTask },
+			{ title: 'Build', task: buildTask }
+		]
+
+	// Only deploy automatically on CI
+	const shouldDeploy = process.env.CI // && IS_MAIN_BRANCH
+	const deployTasks = shouldDeploy
+		? [{ title: 'Deploy', task: () => deployPackages(SERVICE_MODULE_DIRS.toPackageObjects()) }]
+		: []
 
 	const tasks = [
-		...(
-			!args.options.yolo
-				? [
-					{ title: 'Clean', task: removeTask },
-					{ title: 'Install', task: installTask },
-				]
-				: []
-		),
-		{ title: 'Build Libs', task: buildLibsTask },
-		{ title: 'Sync', task: syncTask },
-		{ title: 'Build Services', task: buildServicesTask },
+		...preTaks,
+		...buildTasks,
 		{ title: 'Lint', task: lintTask },
-		{ title: 'Test', task: testTask }
+		{ title: 'Test', task: testTask },
+		...deployTasks,
 	];
 
 	await listr(tasks).run();

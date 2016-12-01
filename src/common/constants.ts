@@ -28,9 +28,9 @@ export interface IPackageObject {
 export interface IPackage {
 	name: string;
 	version: string;
-	scripts: { [ name: string ]: string };
-	dependencies?: { [ name: string ]: string };
-	devDependencies?: { [ name: string ]: string };
+	scripts: { [name: string]: string };
+	dependencies?: { [name: string]: string };
+	devDependencies?: { [name: string]: string };
 }
 
 
@@ -51,7 +51,7 @@ function toPackagesArray(paths: Array<string>): IPackagesArray {
 				name: pkg.name,
 				path,
 				package: pkg,
-				hasScript: (name: string) => (pkg.scripts && pkg.scripts[ name ]) !== undefined,
+				hasScript: (name: string) => (pkg.scripts && pkg.scripts[name]) !== undefined,
 			};
 		});
 	};
@@ -82,7 +82,7 @@ export const DESKTOP_MODULE_DIRS = toPackagesArray([
 
 export const LIB_MODULE_DIRS = moduleDirs(LIBS_DIR);
 export const SERVICE_MODULE_DIRS = moduleDirs(SERVICES_DIR);
-export const SCRIPTS_MODULE_DIR = toPackagesArray([ SCRIPTS_DIR ]);
+export const SCRIPTS_MODULE_DIR = toPackagesArray([SCRIPTS_DIR]);
 export const MODULE_DIRS = toPackagesArray([
 	...LIB_MODULE_DIRS,
 	...SERVICE_MODULE_DIRS,
@@ -96,3 +96,7 @@ export function findModule(name: string): IPackageObject | undefined {
 		.toPackageObjects()
 		.find(pkg => pkg.name === name);
 }
+
+
+export const CURRENT_BRANCH = process.env.CURRENT_BRANCH;
+export const IS_MAIN_BRANCH = config.MAIN_BRANCHES.includes(CURRENT_BRANCH);
