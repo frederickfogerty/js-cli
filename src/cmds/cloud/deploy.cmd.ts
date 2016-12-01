@@ -52,14 +52,25 @@ export async function cmd(
 }
 
 
-export function deployPackages(packages: constants.IPackageObject[], opts: { isConcurrent?: true } = {}) {
+/**
+ * Deploy a list of packages
+ */
+export function deployPackages(
+
+	packages: constants.IPackageObject[],
+	opts: { isConcurrent?: boolean } = { isConcurrent: false }
+
+) {
+
 	return listr(packages.map(pkg => ({
 		title: pkg.name,
 		task: () => deploy(pkg),
 	})), { concurrent: opts.isConcurrent });
 }
 
-
+/**
+ * Deploy a package to now
+ */
 function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 	// Setup initial conditions.
 	const path = pkg.path;
