@@ -27,7 +27,13 @@ declare module 'listr' {
 			task: () => (Promise<any> | Listr | Observable<any>);
 			skip?: Function;
 		}
+		interface ICustomRenderer {
+			constructor(tasks, options);
+			render(): void;
+			end(err: Error): void;
+		}
 		interface IListrOptions {
+			renderer?: string | ICustomRenderer;
 			concurrent?: boolean;
 		}
 	}
