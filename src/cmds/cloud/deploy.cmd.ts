@@ -70,6 +70,8 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 		? `now --docker`
 		: `now --npm --forward-npm`;
 
+	cmd += ` --token ${process.env.NOW_TOKEN}`;
+
 	// Look for environment variables.
 	const vars = env.read({ path: fsPath.join(path, '.env') });
 	vars.NODE_ENV = 'production';
