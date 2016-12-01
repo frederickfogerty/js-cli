@@ -1,3 +1,5 @@
+import { execaCommand } from '../../common/util/execa';
+import { execa, listr } from '../../common/util';
 import {
 	R,
 	log,
@@ -45,14 +47,20 @@ export async function cmd(
 	}
 
 	// Start deploying each module.
-	modules.forEach(pkg => deploy(pkg, isTest));
+
+	await deployPackages(modules, { isConcurrent: true }).run();
 }
 
 
+export function deployPackages(packages: constants.IPackageObject[], opts: { isConcurrent?: true } = {}) {
+	return listr(packages.map(pkg => ({
+		title: pkg.name,
+		task: () => deploy(pkg),
+	})), { concurrent: opts.isConcurrent });
+}
 
 
-
-function deploy(pkg: constants.IPackageObject, isTest: boolean) {
+function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 	// Setup initial conditions.
 	const path = pkg.path;
 	const isDocker = fs.existsSync(fsPath.join(path, 'Dockerfile'));
@@ -92,8 +100,9 @@ function deploy(pkg: constants.IPackageObject, isTest: boolean) {
 		const packageJsonPath = fsPath.join(pkg.path, 'package.json');
 		if (fs.readJsonSync(packageJsonPath).scripts.prepublish != null) { out += 'npm run prepublish &&'; }
 		out += ` ${cmd}`;
-		run.execInNewTab(`${out}`, path);
-		log.info.gray('Deployment started in new tab.');
+		return execaCommand(out, { cwd: path })
+		// run.execInNewTab(`${out}`, path);
+		// log.info.gray('Deployment started in new tab.');
 	} else {
 		log.info.yellow('Running in test mode. Deployment not started.');
 	}
@@ -108,12 +117,13 @@ async function selectedModules(names: string[]): Promise<Array<constants.IPackag
 		const modules = constants
 			.SERVICE_MODULE_DIRS
 			.toPackageObjects();
-		return [(await prompt.forModule(modules))];
+		return await prompt.forModule(modules);
 	};
 
 	if (names.length === 0) {
 		// No module was specified. Prompt the user to select one.
-		return await promptForModule();
+		const pkgs = await promptForModule();
+		return pkgs
 	} else {
 
 		// Look for modules that match the name (or partial names) provided as CLI arguments.
