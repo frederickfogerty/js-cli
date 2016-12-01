@@ -28,7 +28,7 @@ export async function cmd(args: {
 	const removeTask = () => run.execOn(modules, `rm -rf node_modules`).listr;
 
 	// Install in all modules
-	const installTask = () => run.execOn(modules, `yarn`).listr;
+	const installTask = () => run.execOn(modules, `yarn`, { isConcurrent: false }).listr;
 
 	// Run a build and sync
 	const buildTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
