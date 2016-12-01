@@ -1,4 +1,4 @@
-import { R } from './util';
+import { R } from './libs';
 import * as inquirer from 'inquirer';
 import * as constants from './constants';
 

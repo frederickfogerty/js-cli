@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { fs, fsPath } from './libs';
+import { fs, fsPath } from '../libs';
 import config from '../config';
 
 

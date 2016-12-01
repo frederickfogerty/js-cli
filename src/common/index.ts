@@ -6,6 +6,7 @@ import * as prompt from './prompt';
 
 export { constants, deps, time, run, prompt }
 export * from './util'
+export * from './libs'
 
 export { default as config } from './config';
 

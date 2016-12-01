@@ -7,7 +7,6 @@ export { env, http }
 export { log } from './log'
 export * from './exec'
 export * from './execa'
-export * from './libs'
 
 import * as moment from 'moment';
 import * as pluralize from 'pluralize';

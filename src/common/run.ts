@@ -5,12 +5,12 @@ import {
 	exec,
 	exec$,
 	execa,
-	fsPath,
 	listr,
 	Listr
 } from './util';
 import * as deps from './deps';
 export { exec, execAsync, exec$ }
+import { fsPath } from './libs';
 
 
 export interface IExecOnModulesResult {
