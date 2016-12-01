@@ -1,4 +1,4 @@
-import { LIB_MODULE_DIRS, MODULE_DIRS } from '../../common/constants';
+import { LIB_MODULE_DIRS, MODULE_DIRS, SERVICE_MODULE_DIRS } from '../../common/constants';
 import { R, run, constants, log, printTitle, time, listr } from '../../common';
 import { createPackageSyncListr } from './sync-libs.cmd';
 
@@ -31,9 +31,10 @@ export async function cmd(args: {
 	const installTask = () => run.execOn(modules, `yarn`, { isConcurrent: false }).listr;
 
 	// Run a build and sync
-	const buildTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
+	const buildLibsTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
 	const syncTask = () => createPackageSyncListr().syncListr;
 
+	const buildServicesTask = () => run.execOnIfScriptExists(SERVICE_MODULE_DIRS.toPackageObjects(), `build`).listr;
 	const lintTask = () => run.execOnIfScriptExists(modules, `lint`).listr;
 	const testTask = () => run.execOnIfScriptExists(modules, `test`).listr;
 
@@ -46,8 +47,9 @@ export async function cmd(args: {
 				]
 				: []
 		),
-		{ title: 'Build', task: buildTask },
+		{ title: 'Build Libs', task: buildLibsTask },
 		{ title: 'Sync', task: syncTask },
+		{ title: 'Build Services', task: buildServicesTask },
 		{ title: 'Lint', task: lintTask },
 		{ title: 'Test', task: testTask }
 	];
