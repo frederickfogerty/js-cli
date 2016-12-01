@@ -98,8 +98,10 @@ export function findModule(name: string): IPackageObject | undefined {
 }
 
 
+export const IS_CI = process.env.CI;
+
 export const CURRENT_BRANCH = process.env.CURRENT_BRANCH;
 export const IS_MAIN_BRANCH = config.MAIN_BRANCHES.includes(CURRENT_BRANCH);
 
 
-export const IS_TTY = (process.stdout as any).isTTY;
+export const IS_TTY = (process.stdout as any).isTTY && !IS_CI;
