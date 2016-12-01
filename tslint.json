@@ -1,41 +1,5 @@
 {
 	"extends": [
-		"tslint:latest"
-	],
-	"rules": {
-		"no-consecutive-blank-lines": [
-			false
-		],
-		"no-var-requires": false,
-		"ordered-imports": [
-			false
-		],
-		"object-literal-sort-keys": false,
-		"object-literal-key-quotes": [
-			false
-		],
-		"object-literal-shorthand": false,
-		"quotemark": [
-			true,
-			"single"
-		],
-		"no-console": [
-			false
-		],
-		"only-arrow-functions": [
-			false
-		],
-		"trailing-comma": [
-			true
-		],
-		"no-namespace": false,
-		"indent": [
-			"tab"
-		],
-		"arrow-parens": false,
-		"array-type": [
-			false
-		],
-		"no-shadowed-variable": false
-	}
+		"@fredfogerty/tslint-config"
+	]
 }

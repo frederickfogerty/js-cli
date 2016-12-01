@@ -2,6 +2,12 @@
 # yarn lockfile v1
 
 
+"@fredfogerty/tslint-config@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@fredfogerty/tslint-config/-/tslint-config-2.0.0.tgz#bb70e896634060c8533642b73b1c955ed3295f9d"
+  dependencies:
+    tslint "4"
+
 "@types/adm-zip":
   version "0.4.30"
   resolved "https://registry.yarnpkg.com/@types/adm-zip/-/adm-zip-0.4.30.tgz#8aefabf5955712e43a08d0f30946095a37a4306d"
@@ -3901,19 +3907,7 @@ tslint-microsoft-contrib@2.0.12:
   version "2.0.12"
   resolved "https://registry.yarnpkg.com/tslint-microsoft-contrib/-/tslint-microsoft-contrib-2.0.12.tgz#f5f229709a30ba5a2d4587ef881c9a86f502cd62"
 
-tslint@^3.15.1:
-  version "3.15.1"
-  resolved "https://registry.yarnpkg.com/tslint/-/tslint-3.15.1.tgz#da165ca93d8fdc2c086b51165ee1bacb48c98ea5"
-  dependencies:
-    colors "^1.1.2"
-    diff "^2.2.1"
-    findup-sync "~0.3.0"
-    glob "^7.0.3"
-    optimist "~0.6.0"
-    resolve "^1.1.7"
-    underscore.string "^3.3.4"
-
-tslint@^4.0.1:
+tslint@4, tslint@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/tslint/-/tslint-4.0.1.tgz#42ae8ac2b994331a6f61c5809916df86411fd880"
   dependencies:
@@ -3925,6 +3919,18 @@ tslint@^4.0.1:
     resolve "^1.1.7"
     underscore.string "^3.3.4"
     update-notifier "^1.0.2"
+
+tslint@^3.15.1:
+  version "3.15.1"
+  resolved "https://registry.yarnpkg.com/tslint/-/tslint-3.15.1.tgz#da165ca93d8fdc2c086b51165ee1bacb48c98ea5"
+  dependencies:
+    colors "^1.1.2"
+    diff "^2.2.1"
+    findup-sync "~0.3.0"
+    glob "^7.0.3"
+    optimist "~0.6.0"
+    resolve "^1.1.7"
+    underscore.string "^3.3.4"
 
 tunnel-agent@~0.4.1:
   version "0.4.3"
