@@ -68,3 +68,5 @@ declare module 'fuzzy' {
 }
 
 
+
+declare module 'updeep';

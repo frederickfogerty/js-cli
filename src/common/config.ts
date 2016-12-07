@@ -7,6 +7,7 @@ import * as fs from 'fs-extra-promise';
 import * as invariant from 'invariant';
 import * as dotenv from 'dotenv';
 import * as R from 'ramda';
+import * as u from 'updeep';
 
 const CONFIG_FILE = 'js-cli-config.js';
 
@@ -58,7 +59,7 @@ export async function init() {
 
 	// Override from consumer's config
 	const projectConfig = require(fsPath.join(config.ROOT_DIR, CONFIG_FILE));
-	config = R.merge(config, projectConfig);
+	Object.assign(config, u(projectConfig, config));
 
 	// Post-processing
 	config.SCRIPTS_DIRS = [DEFAULT_SCRIPT_DIRS].concat(config.SCRIPTS_DIRS);
