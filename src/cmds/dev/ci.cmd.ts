@@ -27,10 +27,10 @@ export async function cmd(args: {
 	const currentModules = (IS_MAIN_BRANCH ? SERVICE_MODULE_DIRS : MODULE_DIRS).toPackageObjects();
 
 	// Remove all node_modules
-	const removeTask = () => run.execOn(currentModules, `rm -rf node_modules`).listr;
+	const removeTask = () => run.execOn(currentModules, config.ci.cleanCmd).listr;
 
 	// Install in all modules
-	const installTask = () => run.execOn(currentModules, `yarn`, { isConcurrent: args.options.fast }).listr;
+	const installTask = () => run.execOn(currentModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
 
 	// Run a build and sync
 	const buildLibsTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;

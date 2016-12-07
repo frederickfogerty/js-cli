@@ -6,6 +6,7 @@ import * as fsPath from 'path';
 import * as fs from 'fs-extra-promise';
 import * as invariant from 'invariant';
 import * as dotenv from 'dotenv';
+import * as R from 'ramda';
 
 const CONFIG_FILE = 'js-cli-config.js';
 
@@ -34,7 +35,7 @@ async function findRootDir() {
 
 const DEFAULT_SCRIPT_DIRS = path.join(__dirname, '../cmds/**');
 
-const config = {
+let config = {
 	ROOT_DIR: '',
 	SCRIPTS_DIRS: [] as string[],
 	ORG_NAME: '',
@@ -43,6 +44,10 @@ const config = {
 	NOW_TOKEN: '',
 	MAIN_BRANCHES: ['master', 'dev'],
 	AUTO_DEPLOY: true,
+	ci: {
+		cleanCmd: 'rm -rf node_modules',
+		installCmd: 'yarn',
+	}
 };
 
 export default config;
@@ -53,7 +58,7 @@ export async function init() {
 
 	// Override from consumer's config
 	const projectConfig = require(fsPath.join(config.ROOT_DIR, CONFIG_FILE));
-	Object.assign(config, projectConfig);
+	config = R.merge(config, projectConfig);
 
 	// Post-processing
 	config.SCRIPTS_DIRS = [DEFAULT_SCRIPT_DIRS].concat(config.SCRIPTS_DIRS);
