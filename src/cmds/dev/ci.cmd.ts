@@ -1,4 +1,11 @@
-import { IS_MAIN_BRANCH, LIB_MODULE_DIRS, MODULE_DIRS, SERVICE_MODULE_DIRS } from '../../common/constants';
+import {
+	IS_CI,
+	IS_MAIN_BRANCH,
+	LIB_MODULE_DIRS,
+	LIBS_DIR,
+	MODULE_DIRS,
+	SERVICE_MODULE_DIRS
+} from '../../common/constants';
 import { R, run, config, constants, log, printTitle, time, listr } from '../../common';
 import { createPackageSyncListr } from './sync-libs.cmd';
 import { deployPackages } from '../cloud/deploy.cmd';
@@ -25,36 +32,44 @@ export async function cmd(args: {
 	const startedAt = time.timer();
 
 	const currentModules = (IS_MAIN_BRANCH ? SERVICE_MODULE_DIRS : MODULE_DIRS).toPackageObjects();
+	const libModules = LIB_MODULE_DIRS.toPackageObjects();
+	const codeModules = SERVICE_MODULE_DIRS.toPackageObjects();
 
 	// Remove all node_modules
 	const removeTask = () => run.execOn(currentModules, config.ci.cleanCmd).listr;
 
 	// Install in all modules
 	const installTask = () => run.execOn(currentModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
+	const installLibsTask = () => run.execOn(libModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr
+	const installCodeTask = () => run.execOn(codeModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr
 
 	// Run a build and sync
-	const buildLibsTask = () => run.execOnIfScriptExists(LIB_MODULE_DIRS.toPackageObjects(), `build`).listr;
+	const buildLibsTask = () => run.execOnIfScriptExists(libModules, `build`).listr;
 	const syncTask = () => createPackageSyncListr().syncListr;
 
+	const buildServicesTask = () => run.execOnIfScriptExists(SERVICE_MODULE_DIRS.toPackageObjects(), `build`).listr;
 	const buildTask = () => run.execOnIfScriptExists(currentModules, `build`).listr;
 	const lintTask = () => run.execOnIfScriptExists(currentModules, `lint`).listr;
 	const testTask = () => run.execOnIfScriptExists(currentModules, `test`).listr;
 
 
-	const preTaks = !args.options.yolo
-		? [
-			{ title: 'Clean', task: removeTask },
-			{ title: 'Install', task: installTask },
-		]
+	const YOLO = args.options.yolo;
+	const preTaks = !YOLO
+		? [{ title: 'Clean', task: removeTask },]
 		: []
 
 
-	const buildTasks = IS_MAIN_BRANCH
-		? [{ title: 'Build Services', task: buildTask }]
+	const installAndBuildTasks = IS_MAIN_BRANCH
+		? [
+			...(!YOLO ? [{ title: 'Install', task: installTask }] : []),
+			{ title: 'Build', task: buildTask },
+		]
 		: [
+			...(!YOLO ? [{ title: 'Install Libs', task: installLibsTask }] : []),
 			{ title: 'Build Libs', task: buildLibsTask },
-			{ title: 'Sync', task: syncTask },
-			{ title: 'Build', task: buildTask }
+			...(!YOLO ? [{ title: 'Install Services', task: installCodeTask }] : []),
+			{ title: 'Sync', task: syncTask }, // Sync after install to make sure latest code is used for libs.
+			{ title: 'Build Services', task: buildServicesTask }
 		]
 
 	// Only deploy automatically on CI
@@ -65,7 +80,7 @@ export async function cmd(args: {
 
 	const tasks = [
 		...preTaks,
-		...buildTasks,
+		...installAndBuildTasks,
 		{ title: 'Lint', task: lintTask },
 		{ title: 'Test', task: testTask },
 		...deployTasks,
