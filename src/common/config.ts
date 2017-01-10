@@ -48,7 +48,11 @@ let config = {
 	ci: {
 		cleanCmd: 'rm -rf node_modules',
 		installCmd: 'yarn',
-	}
+	},
+
+	AUTH0_REFRESH_TOKEN: '',
+	AUTH0_CLIENT_ID: '',
+	AUTH0_DOMAIN: '',
 };
 
 export default config;
@@ -68,7 +72,9 @@ export async function init() {
 			// It's not an absolute path, create the directory
 			envFile = path.resolve(config.ROOT_DIR, envFile);
 		}
-		dotenv.config({ path: envFile });
+		const dotenvConfig = dotenv.config({ path: envFile });
+		if (!dotenvConfig) { return; }
+		Object.assign(config, dotenvConfig);
 	});
 }
 
