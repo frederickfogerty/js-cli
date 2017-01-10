@@ -2,7 +2,7 @@ import { R } from './libs';
 import * as inquirer from 'inquirer';
 import * as constants from './constants';
 
-const ALL_MODULES_LABEL = 'all modules'
+const ALL_MODULES_LABEL = 'all modules';
 
 /**
  * Prompts the user to select a module.
@@ -12,7 +12,7 @@ export async function forModule(
 	message = 'Module',
 	opts: { allowAll?: boolean } = { allowAll: true },
 ): Promise<constants.IPackageObject[]> {
-	const choices = (opts.allowAll ? [ALL_MODULES_LABEL] : []).concat(pkgs.map(pkg => pkg.name))
+	const choices = (opts.allowAll ? [ALL_MODULES_LABEL] : []).concat(pkgs.map((pkg) => pkg.name));
 
 	const confirm = {
 		type: 'list',

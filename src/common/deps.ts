@@ -12,9 +12,9 @@ function toDependenciesArray(pkg: constants.IPackage) {
 	const deps = mergeDependencies(pkg);
 	const result = Object
 		.keys(deps)
-		.map(name => name)
-		.filter(name => name.startsWith(config.ORG_NAME))
-		.map(name => [pkg.name, name]);
+		.map((name) => name)
+		.filter((name) => name.startsWith(config.ORG_NAME))
+		.map((name) => [pkg.name, name]);
 	return result.length === 0
 		? [[pkg.name]]
 		: result;
@@ -24,16 +24,16 @@ function toDependenciesArray(pkg: constants.IPackage) {
 /**
  * Retrieves a depth-first dependency order from the given packages.
  */
-export function orderByDepth(packages: Array<constants.IPackageObject>): Array<constants.IPackageObject> {
+export function orderByDepth(packages: constants.IPackageObject[]): constants.IPackageObject[] {
 	const graph = packages
-		.filter(item => item.name.startsWith(config.ORG_NAME))
-		.map(item => toDependenciesArray(item.package))
-		.reduce((acc: Array<any>, items: Array<any>) => {
-			items.forEach(item => acc.push(item));
+		.filter((item) => item.name.startsWith(config.ORG_NAME))
+		.map((item) => toDependenciesArray(item.package))
+		.reduce((acc: any[], items: any[]) => {
+			items.forEach((item) => acc.push(item));
 			return acc;
 		}, []);
 	const names = toposort<string>(graph).reverse();
-	const result = names.map(name => R.find(R.propEq('name', name), packages));
+	const result = names.map((name) => R.find(R.propEq('name', name), packages));
 	return R.reject(R.isNil, result);
 }
 
@@ -50,6 +50,6 @@ export function dependsOn(pkg: constants.IPackageObject): constants.IPackageObje
 	return constants
 		.MODULE_DIRS
 		.toPackageObjects()
-		.filter(item => item.name !== pkg.name)
-		.filter(item => isDependent(item.package));
+		.filter((item) => item.name !== pkg.name)
+		.filter((item) => isDependent(item.package));
 }

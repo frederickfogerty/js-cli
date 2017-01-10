@@ -33,7 +33,7 @@ function formatString(key: string, value: string) {
 	return `  ${log.gray(left)} ${log.magenta(value)}`;
 }
 
-function formatArray(title: string, values: Array<string>) {
+function formatArray(title: string, values: string[]) {
 	return values.map((value, i) => {
 		const left = i === 0
 			? formatLeft(`${title}:`)
@@ -49,12 +49,12 @@ export function cmd() {
 	const data = R.merge(constants, config);
 	const items = Object
 		.keys(data)
-		.map(key => ({ key, value: (data as any)[key] }));
+		.map((key) => ({ key, value: (data as any)[key] }));
 
 	// Simple values.
 	// log.info.blue('Strings\n');
 	items
-		.forEach(item => print(item.key, item.value));
+		.forEach((item) => print(item.key, item.value));
 
 	// Arrays.
 	// log.info.blue('\nArrays');

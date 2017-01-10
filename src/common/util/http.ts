@@ -19,7 +19,7 @@ async function request<T>(
 	method: HttpMethod,
 	requestUrl: string,
 	data?: Object,
-	headers?: IHttpHeaders
+	headers?: IHttpHeaders,
 ): Promise<IResponse<T>> {
 	const payload = {
 		method,

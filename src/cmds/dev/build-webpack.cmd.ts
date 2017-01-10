@@ -8,7 +8,7 @@ import {
 	projectPath,
 	time,
 	listr,
-	Listr
+	Listr,
 } from '../../common';
 import * as filesize from 'filesize';
 import * as AdmZip from 'adm-zip';
@@ -27,13 +27,13 @@ export async function cmd(
 		options: {
 			dev: boolean, d: boolean,
 			prod: boolean, p: boolean,
-		}
-	}
+		},
+	},
 
 ) {
 	// Setup initial conditions.
 	const startedAt = time.timer();
-	const tasks = [] as Array<Listr.IListrTask>;
+	const tasks = [] as Listr.IListrTask[];
 
 	// Environment.
 	const options = args.options || {};
@@ -99,8 +99,8 @@ function printSummary(dir: string) {
 
 	fs
 		.readdirSync(dir)
-		.filter(name => name.endsWith('.js'))
-		.forEach(name => {
+		.filter((name) => name.endsWith('.js'))
+		.forEach((name) => {
 			const path = fsPath.join(dir, name);
 			log.info.green(name);
 			log.info.green(` - ${toFileSize(path)}`);

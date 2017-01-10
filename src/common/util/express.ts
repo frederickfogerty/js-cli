@@ -4,7 +4,7 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 interface IErrorStack {
 	message: string;
-	stack: Array<string>;
+	stack: string[];
 }
 
 
@@ -18,7 +18,7 @@ function formatErrorStack(stack: string = ''): IErrorStack {
 	lines.shift();
 	return {
 		message,
-		stack: lines.map(line => line.trim()),
+		stack: lines.map((line) => line.trim()),
 	};
 }
 

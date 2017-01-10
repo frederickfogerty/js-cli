@@ -12,5 +12,5 @@ export function cmdDisable() {
 	// run.execInNewTab(`cd ${constants.DESKTOP_DIR} && npm run dist`);
 	run
 		.exec$(`cd ${constants.DESKTOP_DIR} && npm run dist`)
-		.forEach(e => log.info(e.stdout));
+		.forEach((e) => log.info(e.stdout));
 }

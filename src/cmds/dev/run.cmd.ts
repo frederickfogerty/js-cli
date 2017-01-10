@@ -13,11 +13,11 @@ export const args = {
 
 export async function cmd(
 	args: {
-		params: Array<string>,
+		params: string[],
 		options: {
 			test?: boolean, t?: boolean;
-		}
-	}
+		},
+	},
 ) {
 
 	// Setup initial conditions.
@@ -48,7 +48,7 @@ export async function cmd(
 	let modules = constants
 		.MODULE_DIRS
 		.toPackageObjects()
-		.filter(pkg => isScriptName ? pkg.hasScript(script) : true);
+		.filter((pkg) => isScriptName ? pkg.hasScript(script) : true);
 	await run.execOn(modules, cmd, { isConcurrent: true, isTest }).listr.run();
 
 	if (modules.length === 0) {

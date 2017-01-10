@@ -29,8 +29,8 @@ export async function cmd(
 		params: string[],
 		options: {
 			test?: boolean, t?: boolean,
-		}
-	}
+		},
+	},
 ) {
 	// Setup initial conditions.
 	printTitle('Deploy');
@@ -58,11 +58,11 @@ export async function cmd(
 export function deployPackages(
 
 	packages: constants.IPackageObject[],
-	opts: { isConcurrent?: boolean } = { isConcurrent: false }
+	opts: { isConcurrent?: boolean } = { isConcurrent: false },
 
 ) {
 
-	return listr(packages.map(pkg => ({
+	return listr(packages.map((pkg) => ({
 		title: pkg.name,
 		task: () => deploy(pkg),
 	})), { concurrent: opts.isConcurrent });
@@ -113,7 +113,7 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 		const packageJsonPath = fsPath.join(pkg.path, 'package.json');
 		if (fs.readJsonSync(packageJsonPath).scripts.prepublish != null) { out += 'npm run prepublish &&'; }
 		out += ` ${cmd}`;
-		return execaCommand(out, { cwd: path })
+		return execaCommand(out, { cwd: path });
 		// run.execInNewTab(`${out}`, path);
 		// log.info.gray('Deployment started in new tab.');
 	} else {
@@ -124,7 +124,7 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 
 
 
-async function selectedModules(names: string[]): Promise<Array<constants.IPackageObject>> {
+async function selectedModules(names: string[]): Promise<constants.IPackageObject[]> {
 	names = R.reject(R.isEmpty, names);
 	const promptForModule = async () => {
 		const modules = constants
@@ -136,7 +136,7 @@ async function selectedModules(names: string[]): Promise<Array<constants.IPackag
 	if (names.length === 0) {
 		// No module was specified. Prompt the user to select one.
 		const pkgs = await promptForModule();
-		return pkgs
+		return pkgs;
 	} else {
 
 		// Look for modules that match the name (or partial names) provided as CLI arguments.
@@ -154,9 +154,9 @@ async function selectedModules(names: string[]): Promise<Array<constants.IPackag
  * Look for modules that match the name (or partial names) provided as CLI arguments.
  */
 function matchModules(pkgs: constants.IPackageObject[], names: string[]): constants.IPackageObject[] {
-	const isModuleMatch = (name: string) => names.find(pattern => isFuzzyMatch(pattern, name)) !== undefined;
+	const isModuleMatch = (name: string) => names.find((pattern) => isFuzzyMatch(pattern, name)) !== undefined;
 	return constants
 		.SERVICE_MODULE_DIRS
 		.toPackageObjects()
-		.filter(pkg => isModuleMatch(pkg.name));
+		.filter((pkg) => isModuleMatch(pkg.name));
 }

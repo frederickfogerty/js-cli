@@ -10,8 +10,8 @@ export const description = 'Creates a status report of the cloud deployment.';
 export async function cmd(
   args: {
     params: string[],
-    options: {}
-  }
+    options: {},
+  },
 ) {
   // Setup initial conditions.
   printTitle('Cloud Status');
@@ -19,7 +19,7 @@ export async function cmd(
   // List domains:
   const aliases = await http.getData<IAlias[]>('aliases');
   log.info.blue('Domains:');
-  aliases.forEach(item => {
+  aliases.forEach((item) => {
     const elapsed = `(${time.elapsed(item.created)} ago)`;
     log.info.blue(` - https://${ log.magenta(item.alias) } ${ log.gray(elapsed) }`);
   });

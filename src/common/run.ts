@@ -6,7 +6,7 @@ import {
 	exec$,
 	execa,
 	listr,
-	Listr
+	Listr,
 } from './util';
 import * as deps from './deps';
 export { exec, execAsync, exec$ }
@@ -14,8 +14,8 @@ import { fsPath } from './libs';
 
 
 export interface IExecOnModulesResult {
-	success: Array<constants.IPackageObject>;
-	failed: Array<constants.IPackageObject>;
+	success: constants.IPackageObject[];
+	failed: constants.IPackageObject[];
 }
 export interface IExecOnModulesOptions {
 	isConcurrent?: boolean;
@@ -28,7 +28,7 @@ export interface IExecOnModulesOptions {
  */
 export function execOn(
 
-	modules: Array<constants.IPackageObject>,
+	modules: constants.IPackageObject[],
 	command: string,
 	options?: IExecOnModulesOptions,
 
@@ -37,8 +37,8 @@ export function execOn(
 	// Setup initial conditions.
 	const config = options || { isConcurrent: true };
 	const results = {
-		success: [] as Array<constants.IPackageObject>,
-		failed: [] as Array<constants.IPackageObject>,
+		success: [] as constants.IPackageObject[],
+		failed: [] as constants.IPackageObject[],
 	};
 
 	// Ensure the modules are in depth-first order.
@@ -52,13 +52,13 @@ export function execOn(
 	};
 
 	// Run the command on each module.
-	const tasks = modules.map(pkg => ({
+	const tasks = modules.map((pkg) => ({
 		title: pkg.name,
 		task: () => runTask(pkg),
 	}));
 	return {
 		listr: listr(tasks, { concurrent: config.isConcurrent }),
-		results
+		results,
 	};
 
 }
@@ -70,16 +70,16 @@ export function execOn(
  */
 export function execOnIfScriptExists(
 
-	modules: Array<constants.IPackageObject>,
+	modules: constants.IPackageObject[],
 	script: string,
 	options: IExecOnModulesOptions = { isConcurrent: true, isTest: false },
 
 ) {
-	const filteredModules = modules.filter(pkg => pkg.hasScript(script));
+	const filteredModules = modules.filter((pkg) => pkg.hasScript(script));
 	return execOn(
 		filteredModules,
 		`yarn run ${script}`,
-		{ isConcurrent: options.isConcurrent, isTest: options.isTest }
+		{ isConcurrent: options.isConcurrent, isTest: options.isTest },
 	);
 }
 

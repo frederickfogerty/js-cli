@@ -20,7 +20,7 @@ export { moment, pluralize, constants }
 
 
 export function listr(tasks?: Listr.IListrTask[], options: Listr.IListrOptions = {}): Listr {
-	if (typeof options.renderer === 'undefined') options.renderer = IS_TTY ? 'update' : 'verbose'
+	if (options.renderer == null) { options.renderer = IS_TTY ? 'update' : 'verbose'; };
 	return new Listr(tasks, options);
 }
 export { Listr }
@@ -39,7 +39,7 @@ export function projectPath(path: string) {
 /**
  * Common styling for a command title.
  */
-export function printTitle(title: string, ) {
+export function printTitle(title: string) {
 	log.info.cyan(`
 -----------------------------------------------------------------------------------------
  ${title}

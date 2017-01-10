@@ -21,8 +21,8 @@ const PATTERN = '/lib/**/*.js';
 export async function cmd(
 	args?: {
 		params: string[],
-		options: {}
-	}
+		options: {},
+	},
 ) {
 
 	printTitle('Sync on change');
@@ -30,9 +30,9 @@ export async function cmd(
 	const modules = constants
 		.MODULE_DIRS
 		.toPackageObjects()
-		.filter(pkg => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
+		.filter((pkg) => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
 
-	modules.forEach(pkg => {
+	modules.forEach((pkg) => {
 		log.info.blue(` - ${log.magenta(pkg.name)}${log.gray(PATTERN)}`);
 		watch(pkg);
 	});
@@ -46,12 +46,12 @@ function watch(pkg: constants.IPackageObject) {
 		const pkgs = deps.dependsOn(pkg);
 		if (pkgs.length > 0) {
 			syncLibs.cmd({
-				params: pkgs.map(pkg => pkg.name),
+				params: pkgs.map((pkg) => pkg.name),
 				options: {},
 			});
 		}
 	};
 	chokidar
 		.watch(`${pkg.path}${PATTERN}`)
-		.on('change', path => sync());
+		.on('change', (path) => sync());
 }

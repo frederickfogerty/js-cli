@@ -13,9 +13,9 @@ export const DESKTOP_LOG_DIR = fsPath.join(os.homedir(), 'Library/Logs/teamdb');
 
 
 export interface IPackagesArray extends Array<string> {
-	toPackagePaths(): Array<string>;
-	toPackages(): Array<any>;
-	toPackageObjects(): Array<IPackageObject>;
+	toPackagePaths(): string[];
+	toPackages(): any[];
+	toPackageObjects(): IPackageObject[];
 }
 
 export interface IPackageObject {
@@ -38,13 +38,13 @@ export interface IPackage {
 /**
  * Decorates an array of paths with the `IPackagesArray` methods.
  */
-function toPackagesArray(paths: Array<string>): IPackagesArray {
+function toPackagesArray(paths: string[]): IPackagesArray {
 	paths = R.clone(paths);
 	const result = paths as any;
 
 	// Decorate with methods.
-	result.toPackageObjects = (): Array<IPackageObject> => {
-		return paths.map(path => {
+	result.toPackageObjects = (): IPackageObject[] => {
+		return paths.map((path) => {
 			const packagePath = fsPath.join(path, 'package.json');
 			const pkg = fs.readJsonSync(packagePath) as any;
 			return {
@@ -55,8 +55,8 @@ function toPackagesArray(paths: Array<string>): IPackagesArray {
 			};
 		});
 	};
-	result.toPackagePaths = (): Array<string> => paths.map(path => fsPath.join(path, 'package.json'));
-	result.toPackages = (): Array<IPackage> => result.toPackageObjects().map((o: IPackageObject) => o.package);
+	result.toPackagePaths = (): string[] => paths.map((path) => fsPath.join(path, 'package.json'));
+	result.toPackages = (): IPackage[] => result.toPackageObjects().map((o: IPackageObject) => o.package);
 
 	// Finish up.
 	return result;
@@ -94,7 +94,7 @@ export const MODULE_DIRS = toPackagesArray([
 export function findModule(name: string): IPackageObject | undefined {
 	return MODULE_DIRS
 		.toPackageObjects()
-		.find(pkg => pkg.name === name);
+		.find((pkg) => pkg.name === name);
 }
 
 
@@ -105,3 +105,6 @@ export const IS_MAIN_BRANCH = config.MAIN_BRANCHES.includes(CURRENT_BRANCH);
 
 
 export const IS_TTY = (process.stdout as any).isTTY && !IS_CI;
+
+
+// export const AUTH0_REFRESH_TOKEN=

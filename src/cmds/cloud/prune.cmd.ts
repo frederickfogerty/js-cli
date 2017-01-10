@@ -6,7 +6,7 @@ import {
 	time,
 	prompt,
 	pluralize,
-	Listr
+	Listr,
 } from '../../common';
 import { IDeployment, IAlias, http } from './common';
 
@@ -26,8 +26,8 @@ export async function cmdDisable(
 		params: string[],
 		options: {
 			test?: boolean, t?: boolean,
-		}
-	}
+		},
+	},
 ) {
 	// Setup initial conditions.
 	printTitle('Prune Non-Aliased Cloud Deployments ');
@@ -41,7 +41,7 @@ export async function cmdDisable(
 
 	// List domains:
 	log.info.blue('Domains:');
-	aliases.forEach(item => {
+	aliases.forEach((item) => {
 		const elapsed = `(${time.elapsed(item.created)} ago)`;
 		log.info.blue(` - https://${log.magenta(item.alias)} ${log.gray(elapsed)}`);
 	});
@@ -56,14 +56,14 @@ export async function cmdDisable(
 
 	// Build the list of deployments to prune.
 	let list = deployments
-		.filter(deployment => nameMatches(deployment.name))
-		.filter(deployment => !hasAlias(deployment.uid));
+		.filter((deployment) => nameMatches(deployment.name))
+		.filter((deployment) => !hasAlias(deployment.uid));
 	list = R.sortBy(R.prop('name'), list);
 
 	// List out what is about to be removed.
 	const tasks: Listr.IListrTask[] = [];
 	let currentName = '';
-	list.forEach(deployment => {
+	list.forEach((deployment) => {
 		const { name, url, uid } = deployment;
 		if (currentName !== deployment.name) {
 			log.info.cyan(deployment.name);

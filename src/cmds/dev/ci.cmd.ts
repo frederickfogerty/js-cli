@@ -4,7 +4,7 @@ import {
 	LIB_MODULE_DIRS,
 	LIBS_DIR,
 	MODULE_DIRS,
-	SERVICE_MODULE_DIRS
+	SERVICE_MODULE_DIRS,
 } from '../../common/constants';
 import { R, run, config, constants, log, printTitle, time, listr } from '../../common';
 import { createPackageSyncListr } from './sync-libs.cmd';
@@ -25,8 +25,8 @@ export async function cmd(args: {
 	params: string[],
 	options: {
 		fast?: boolean,
-		yolo?: boolean
-	}
+		yolo?: boolean,
+	},
 }) {
 	// Setup initial conditions.
 	const startedAt = time.timer();
@@ -40,8 +40,8 @@ export async function cmd(args: {
 
 	// Install in all modules
 	const installTask = () => run.execOn(currentModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
-	const installLibsTask = () => run.execOn(libModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr
-	const installCodeTask = () => run.execOn(codeModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr
+	const installLibsTask = () => run.execOn(libModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
+	const installCodeTask = () => run.execOn(codeModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
 
 	// Run a build and sync
 	const buildLibsTask = () => run.execOnIfScriptExists(libModules, `build`).listr;
@@ -55,8 +55,8 @@ export async function cmd(args: {
 
 	const YOLO = args.options.yolo;
 	const preTaks = !YOLO
-		? [{ title: 'Clean', task: removeTask },]
-		: []
+		? [{ title: 'Clean', task: removeTask }]
+		: [];
 
 
 	const installAndBuildTasks = IS_MAIN_BRANCH
@@ -69,14 +69,14 @@ export async function cmd(args: {
 			{ title: 'Build Libs', task: buildLibsTask },
 			...(!YOLO ? [{ title: 'Install Services', task: installCodeTask }] : []),
 			{ title: 'Sync', task: syncTask }, // Sync after install to make sure latest code is used for libs.
-			{ title: 'Build Services', task: buildServicesTask }
-		]
+			{ title: 'Build Services', task: buildServicesTask },
+		];
 
 	// Only deploy automatically on CI
-	const shouldDeploy = config.AUTO_DEPLOY && process.env.CI && IS_MAIN_BRANCH
+	const shouldDeploy = config.AUTO_DEPLOY && process.env.CI && IS_MAIN_BRANCH;
 	const deployTasks = shouldDeploy
 		? [{ title: 'Deploy', task: () => deployPackages(SERVICE_MODULE_DIRS.toPackageObjects()) }]
-		: []
+		: [];
 
 	const tasks = [
 		...preTaks,

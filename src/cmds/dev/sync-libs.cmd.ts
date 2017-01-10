@@ -27,8 +27,8 @@ export const args = {
 export async function cmd(
 	args: {
 		params: string[],
-		options: {}
-	}
+		options: {},
+	},
 ) {
 	const startedAt = time.timer();
 	const { length, syncListr } = createPackageSyncListr(args);
@@ -41,7 +41,7 @@ export async function cmd(
 
 export function createPackageSyncListr(args?: {
 	params: string[],
-	options: {}
+	options: {},
 }) {
 	// Setup initial conditions.
 	const params = (args && args.params) || [];
@@ -55,35 +55,35 @@ export function createPackageSyncListr(args?: {
 		// return hasFolder('src') || hasFolder('pages');
 	};
 
-	const localDependencies = (pkg: constants.IPackage): Array<constants.IPackageObject> => {
-		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter(name => name.startsWith(config.ORG_NAME));
+	const localDependencies = (pkg: constants.IPackage): constants.IPackageObject[] => {
+		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter((name) => name.startsWith(config.ORG_NAME));
 		return constants.MODULE_DIRS
 			.toPackageObjects()
-			.filter(item => item.name !== pkg.name)
-			.filter(item => R.contains(item.name, dependencies))
-			.filter(item => canCopy(item));
+			.filter((item) => item.name !== pkg.name)
+			.filter((item) => R.contains(item.name, dependencies))
+			.filter((item) => canCopy(item));
 	};
 
 	const includeModule = (moduleName: string): boolean => {
 		if (params.length === 0) { return true; }
-		return R.any(pattern => isFuzzyMatch(pattern, moduleName), params);
+		return R.any((pattern) => isFuzzyMatch(pattern, moduleName), params);
 	};
 
 	const dependencyOrder = deps
 		.orderByDepth(constants.MODULE_DIRS.toPackageObjects())
-		.filter(item => includeModule(item.name))
-		.map(item => ({
+		.filter((item) => includeModule(item.name))
+		.map((item) => ({
 			name: item.name,
 			path: item.path,
 			localDependencies: localDependencies(item.package),
 			package: item,
 		}))
-		.filter(item => item.localDependencies.length > 0);
+		.filter((item) => item.localDependencies.length > 0);
 
 	// Copy local dependencies into each module.
-	const tasks = dependencyOrder.map(target => {
+	const tasks = dependencyOrder.map((target) => {
 		const targetName = log.magenta(target.name);
-		const sourceNames = target.localDependencies.map(source => log.blue(source.name)).join(log.blue(', '));
+		const sourceNames = target.localDependencies.map((source) => log.blue(source.name)).join(log.blue(', '));
 		const title = `Update ${targetName} with ${sourceNames}`;
 
 		const task = async () => {
@@ -95,7 +95,7 @@ export function createPackageSyncListr(args?: {
 
 		return {
 			title,
-			task
+			task,
 		};
 	});
 
@@ -132,7 +132,7 @@ function rsyncExecute(rsync: any): Promise<IRsyncResult> {
 
 async function copyModule(
 	from: { name: string, path: string },
-	to: { name: string, path: string }
+	to: { name: string, path: string },
 ) {
 	const IGNORE = [
 		'node_modules',

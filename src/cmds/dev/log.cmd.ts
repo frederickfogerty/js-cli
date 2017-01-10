@@ -10,12 +10,12 @@ export const args = {
 
 export function cmd(
   args?: {
-    params: Array<string>,
+    params: string[],
     options: {
       prod?: boolean, p?: boolean;
       dev?: boolean, d?: boolean;
-    }
-  }
+    },
+  },
 ) {
   // Setup initial conditions.
   args = args || { params: [], options: {} };
@@ -33,5 +33,5 @@ export function cmd(
   log.info();
   run
     .exec$(cmd)
-    .forEach(e => log.info(e.stdout));
+    .forEach((e) => log.info(e.stdout));
 }
