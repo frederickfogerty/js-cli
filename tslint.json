@@ -1,5 +1,5 @@
 {
 	"extends": [
-		"@fredfogerty/tslint-config"
+		"@fredfogerty/tslint-config/tslint.json"
 	]
 }
