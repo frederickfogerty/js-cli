@@ -47,7 +47,7 @@ export function cmd() {
 
 
 function watchTypescript(pkg: constants.IPackageObject) {
-	const cmd = `cd ${pkg.path} && npm run build:watch`;
+	const cmd = `cd ${pkg.path} && yarn run build:watch`;
 	run
 		.exec$(cmd)
 		.forEach((e) => {
