@@ -16,7 +16,7 @@ export const alias = 'sw';
 export const description = 'Auto syncs when module files change.';
 
 
-const PATTERN = '/lib/**/*.js';
+const PATTERN = '/lib/**/*.{js,ts}';
 
 export async function cmd(
 	args?: {
