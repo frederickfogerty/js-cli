@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-const config = require('./common/config'); // tslint:disable-line
-
-config.init()
+require('./common/config').init() // tslint:disable-line
 	.then(() => {
 		require('./init');
 	});
