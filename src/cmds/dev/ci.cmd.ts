@@ -6,7 +6,7 @@ import {
 	MODULE_DIRS,
 	SERVICE_MODULE_DIRS,
 } from '../../common/constants';
-import { R, run, config, constants, log, printTitle, time, listr } from '../../common';
+import { R, run, config, constants, log, printTitle, time, listr, deps } from '../../common';
 import { createPackageSyncListr } from './sync-libs.cmd';
 import { deployPackages } from '../cloud/deploy.cmd';
 
@@ -39,18 +39,46 @@ export async function cmd(args: {
 	const removeTask = () => run.execOn(currentModules, config.ci.cleanCmd).listr;
 
 	// Install in all modules
-	const installTask = () => run.execOn(currentModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
+	const installBuildSyncTask = () => {
+		const installCommands = args.options.yolo ? [`build`] : [config.ci.installCmd, `build`];
+
+		const tasks = run.execOnIfScriptExists(
+			currentModules, installCommands, { isConcurrent: args.options.fast },
+		).tasks;
+
+		const syncTask = () => createPackageSyncListr().listr;
+		const tasksWithSync = [
+			...tasks,
+			{ title: 'Sync', task: syncTask },
+		];
+		return listr(tasksWithSync, { concurrent: args.options.fast });
+
+	};
 	const installLibsTask = () => run.execOn(libModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
 	const installCodeTask = () => run.execOn(codeModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
 
 	// Run a build and sync
 	const buildLibsTask = () => run.execOnIfScriptExists(libModules, `build`).listr;
-	const syncTask = () => createPackageSyncListr().syncListr;
+	const syncTask = () => createPackageSyncListr().listr;
 
 	const buildServicesTask = () => run.execOnIfScriptExists(SERVICE_MODULE_DIRS.toPackageObjects(), `build`).listr;
 	const buildTask = () => run.execOnIfScriptExists(currentModules, `build`).listr;
 	const lintTask = () => run.execOnIfScriptExists(currentModules, `lint`).listr;
 	const testTask = () => run.execOnIfScriptExists(currentModules, `test`).listr;
+
+	// const modulesInDepthOrder = deps.orderByDepth(currentModules)
+	// const installAndBuildInDepthOrderTask = modulesInDepthOrder
+	// 	.map((module) => ({
+	// 		title: module.name,
+	// 		task: () => listr([
+	// 			{title: `Install deps for ${module.name}`, task: () => }
+	// 		])
+	// 	}))
+
+	// const installAndBuildInDepthOrderTask = () => ({
+	// 	title: 'Install and build dependencies',
+	// 	task: () => listr(installAndBuildInDepthOrderTask)
+	// })
 
 
 	const YOLO = args.options.yolo;
@@ -61,15 +89,15 @@ export async function cmd(args: {
 
 	const installAndBuildTasks = IS_MAIN_BRANCH
 		? [
-			...(!YOLO ? [{ title: 'Install', task: installTask }] : []),
-			{ title: 'Build', task: buildTask },
+			...(!YOLO ? [{ title: 'Install, Build and Sync in order', task: installBuildSyncTask }] : []),
 		]
 		: [
-			...(!YOLO ? [{ title: 'Install Libs', task: installLibsTask }] : []),
-			{ title: 'Build Libs', task: buildLibsTask },
-			...(!YOLO ? [{ title: 'Install Services', task: installCodeTask }] : []),
-			{ title: 'Sync', task: syncTask }, // Sync after install to make sure latest code is used for libs.
-			{ title: 'Build Services', task: buildServicesTask },
+			{ title: 'Install, Build and Sync in order', task: installBuildSyncTask },
+			// ...(!YOLO ? [{ title: 'Install Libs', task: installLibsTask }] : []),
+			// { title: 'Build Libs', task: buildLibsTask },
+			// ...(!YOLO ? [{ title: 'Install Services', task: installCodeTask }] : []),
+			// { title: 'Sync', task: syncTask }, // Sync after install to make sure latest code is used for libs.
+			// { title: 'Build Services', task: buildServicesTask },
 		];
 
 	// Only deploy automatically on CI
