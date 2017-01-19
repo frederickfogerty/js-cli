@@ -10,7 +10,7 @@ import {
 } from './util';
 import * as deps from './deps';
 export { exec, execAsync, exec$ }
-import { fsPath } from './libs';
+import { R, fsPath } from './libs';
 
 
 export interface IExecOnModulesResult {
@@ -22,6 +22,23 @@ export interface IExecOnModulesOptions {
 	isTest?: boolean;
 }
 
+const runTask = async (pkg: constants.IPackageObject, commands: string[] | string) => {
+	if (commands.length === 0) { return null; }
+	if (Array.isArray(commands) && commands.length === 1) {
+		commands = commands[0];
+	}
+
+	if (Array.isArray(commands)) {
+		const tasks = commands.map((command) => ({
+			title: command,
+			task: () => execaCommand(command, { cwd: pkg.path }),
+		}));
+		return listr(tasks);
+	} else {
+		return execaCommand(commands, { cwd: pkg.path });
+	}
+};
+
 
 /**
  * Executes the given command on a set of modules.
@@ -29,40 +46,33 @@ export interface IExecOnModulesOptions {
 export function execOn(
 
 	modules: constants.IPackageObject[],
-	command: string,
+	commands: string | string[],
 	options?: IExecOnModulesOptions,
 
-): { listr: Listr, results: IExecOnModulesResult } {
+): { listr: Listr } {
 
 	// Setup initial conditions.
 	const config = options || { isConcurrent: true };
-	const results = {
-		success: [] as constants.IPackageObject[],
-		failed: [] as constants.IPackageObject[],
-	};
 
 	// Ensure the modules are in depth-first order.
 	modules = deps.orderByDepth(modules);
 
-	const runTask = async (pkg: constants.IPackageObject) => {
-		if (!config.isTest) {
-			return execaCommand(command, { cwd: pkg.path });
-		}
-		return 'TEST';
-	};
-
 	// Run the command on each module.
 	const tasks = modules.map((pkg) => ({
 		title: pkg.name,
-		task: () => runTask(pkg),
+		task: () => runTask(pkg, commands),
 	}));
 	return {
 		listr: listr(tasks, { concurrent: config.isConcurrent }),
-		results,
 	};
 
 }
 
+
+const makeScript = (script: string) =>
+	(script.includes('yarn') || script.includes('npm')) // Check if already an npm command
+		? script :
+		`yarn run ${script}`;
 
 /**
  * Runs the command on a subset of the modules passed which have the command specified in their package.json.
@@ -71,16 +81,36 @@ export function execOn(
 export function execOnIfScriptExists(
 
 	modules: constants.IPackageObject[],
-	script: string,
+	scripts: string | string[],
 	options: IExecOnModulesOptions = { isConcurrent: true, isTest: false },
 
 ) {
-	const filteredModules = modules.filter((pkg) => pkg.hasScript(script));
-	return execOn(
-		filteredModules,
-		`yarn run ${script}`,
-		{ isConcurrent: options.isConcurrent, isTest: options.isTest },
-	);
+	const scriptsArray = Array.isArray(scripts) ? scripts : [scripts];
+
+	const tasks = modules.map((module) => {
+		const availableScripts: string[] = scriptsArray.filter((script) => module.hasScript(script));
+		const scriptCommands = availableScripts.map(makeScript);
+		if (availableScripts.length === 0) { return null; }
+
+		return {
+			title: module.name,
+			task: () => runTask(module, scriptCommands),
+		};
+	});
+
+	const tasksWithoutNull = R.reject(R.isNil, tasks);
+
+	return {
+		listr: listr(tasksWithoutNull, { concurrent: options.isConcurrent }),
+		tasks: tasksWithoutNull,
+	};
+
+	// const filteredModules = modules.filter((pkg) => pkg.hasScript(scriptsArray));
+	// return execOn(
+	// 	filteredModules,
+	// 	`yarn run ${scripts}`,
+	// 	{ isConcurrent: options.isConcurrent, isTest: options.isTest },
+	// );
 }
 
 
