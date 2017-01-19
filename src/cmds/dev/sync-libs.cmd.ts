@@ -31,8 +31,8 @@ export async function cmd(
 	},
 ) {
 	const startedAt = time.timer();
-	const { length, syncListr } = createPackageSyncListr(args);
-	await syncListr.run();
+	const { length, listr } = createPackageSyncListr(args);
+	await listr.run();
 	const elapsed = startedAt.elapsed();
 	const timeStamp = moment().format('h:mm:ssa');
 	log.info.green(`Synced ${length} modules in ${elapsed} ${log.gray(timeStamp)}`);
@@ -103,7 +103,7 @@ export function createPackageSyncListr(args?: {
 	// Finish up.
 	return {
 		length: dependencyOrder.length,
-		syncListr: listr(tasks),
+		listr: listr(tasks),
 	};
 }
 
