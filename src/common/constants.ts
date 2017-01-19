@@ -34,6 +34,14 @@ export interface IPackage {
 }
 
 
+const CORE_SCRIPTS = ['install', 'i'];
+function hasScript(script: string, pkg: { scripts?: { [k: string]: string } }) {
+	const scriptStripped = script.replace('npm', '').replace('yarn', '').trim();
+
+	if (CORE_SCRIPTS.includes(scriptStripped)) { return true; }
+	return (pkg.scripts && pkg.scripts[scriptStripped]) != null;
+}
+
 
 /**
  * Decorates an array of paths with the `IPackagesArray` methods.
@@ -51,7 +59,7 @@ function toPackagesArray(paths: string[]): IPackagesArray {
 				name: pkg.name,
 				path,
 				package: pkg,
-				hasScript: (name: string) => (pkg.scripts && pkg.scripts[name]) !== undefined,
+				hasScript: (name: string) => hasScript(name, pkg),
 			};
 		});
 	};
