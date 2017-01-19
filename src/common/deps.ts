@@ -12,7 +12,6 @@ function toDependenciesArray(pkg: constants.IPackage) {
 	const deps = mergeDependencies(pkg);
 	const result = Object
 		.keys(deps)
-		.map((name) => name)
 		.filter((name) => name.startsWith(config.ORG_NAME))
 		.map((name) => [pkg.name, name]);
 	return result.length === 0
