@@ -36,7 +36,7 @@ async function findRootDir() {
 
 const DEFAULT_SCRIPT_DIRS = path.join(__dirname, '../cmds/**');
 
-let config = {
+const config = {
 	ROOT_DIR: '',
 	SCRIPTS_DIRS: [] as string[],
 	ORG_NAME: '',
@@ -53,6 +53,9 @@ let config = {
 	AUTH0_REFRESH_TOKEN: '',
 	AUTH0_CLIENT_ID: '',
 	AUTH0_DOMAIN: '',
+
+	LIBS_DIR: '',
+	APPS_DIR: '',
 };
 
 export default config;

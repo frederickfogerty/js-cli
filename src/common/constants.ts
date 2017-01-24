@@ -5,10 +5,10 @@ import config from './config';
 
 export const ROOT_DIR = config.ROOT_DIR;
 export const SCRIPTS_DIR = fsPath.join(config.ROOT_DIR, 'scripts');
-export const CODE_DIR = fsPath.join(config.ROOT_DIR, 'code');
-export const LIBS_DIR = fsPath.join(CODE_DIR, 'libs');
-export const SERVICES_DIR = fsPath.join(CODE_DIR, 'services');
-export const DESKTOP_DIR = fsPath.join(CODE_DIR, 'desktop');
+// export const CODE_DIR = fsPath.join(config.ROOT_DIR, config.);
+export const LIBS_DIR = fsPath.join(ROOT_DIR, config.LIBS_DIR);
+export const SERVICES_DIR = fsPath.join(ROOT_DIR, config.APPS_DIR);
+// export const DESKTOP_DIR = fsPath.join(CODE_DIR, 'desktop');
 export const DESKTOP_LOG_DIR = fsPath.join(os.homedir(), 'Library/Logs/teamdb');
 
 
@@ -75,6 +75,7 @@ function toPackagesArray(paths: string[]): IPackagesArray {
  * Retrieves the paths of NPM modules within the given directory.
  */
 function moduleDirs(parentDir: string): IPackagesArray {
+	if (parentDir == null || parentDir.length === 0) { return toPackagesArray([]); }
 	const dirs = fs
 		.readdirSync(parentDir)
 		.map((name: string) => fsPath.join(parentDir, name))
@@ -82,11 +83,6 @@ function moduleDirs(parentDir: string): IPackagesArray {
 	return toPackagesArray(dirs);
 }
 
-
-export const DESKTOP_MODULE_DIRS = toPackagesArray([
-	fsPath.join(DESKTOP_DIR),
-	fsPath.join(DESKTOP_DIR, 'app'),
-]);
 
 export const LIB_MODULE_DIRS = moduleDirs(LIBS_DIR);
 export const SERVICE_MODULE_DIRS = moduleDirs(SERVICES_DIR);
