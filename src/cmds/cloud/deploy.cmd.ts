@@ -126,7 +126,7 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 
 async function selectedModules(names: string[]): Promise<constants.IPackageObject[]> {
 	names = R.reject(R.isEmpty, names);
-	const promptForModule = async () => {
+	const promptForModule = async() => {
 		const modules = constants
 			.SERVICE_MODULE_DIRS
 			.toPackageObjects();

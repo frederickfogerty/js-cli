@@ -45,7 +45,7 @@ export async function cmd(
 	printTitle(`Running ${log.magenta(cmd)}`);
 
 	// Retrieve the list of modules that have tests.
-	let modules = constants
+	const modules = constants
 		.MODULE_DIRS
 		.toPackageObjects()
 		.filter((pkg) => isScriptName ? pkg.hasScript(script) : true);

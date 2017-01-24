@@ -86,8 +86,8 @@ export function createPackageSyncListr(args?: {
 		const sourceNames = target.localDependencies.map((source) => log.blue(source.name)).join(log.blue(', '));
 		const title = `Update ${targetName} with ${sourceNames}`;
 
-		const task = async () => {
-			await Promise.all(target.localDependencies.map(async (source) => {
+		const task = async() => {
+			await Promise.all(target.localDependencies.map(async(source) => {
 				await copyModule(source, target);
 				syncPackageVersion(source, target.package);
 			}));

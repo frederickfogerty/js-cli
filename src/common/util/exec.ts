@@ -77,7 +77,7 @@ export function execWithin(path: string, cmd: string, options?: IExecOptions) {
 export function execAsync(cmd: string, options: IExecOptions = {}): Promise<IExec> {
   return new Promise((resolve, reject) => {
     const silent = options.silent || false;
-    let code = 0;
+    const code = 0;
     const child = childProcess.exec(cmd, (err: any, stdout: string, stderr: string) => {
       if (err) {
         return reject({

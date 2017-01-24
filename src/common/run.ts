@@ -22,7 +22,7 @@ export interface IExecOnModulesOptions {
 	isTest?: boolean;
 }
 
-const runTask = async (pkg: constants.IPackageObject, commands: string[] | string) => {
+const runTask = async(pkg: constants.IPackageObject, commands: string[] | string) => {
 	if (commands.length === 0) { return null; }
 	if (Array.isArray(commands) && commands.length === 1) {
 		commands = commands[0];
