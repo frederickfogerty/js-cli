@@ -54,7 +54,7 @@ export async function cmd(
 	if (!isDev) {
 		tasks.push({
 			title: 'Build typescript',
-			task: async() => {
+			task: async () => {
 				const cmd = `cd ${moduleDir} && export NODE_ENV=${NODE_ENV} && npm run build`;
 				await execAsync(cmd, { silent: true });
 			},
@@ -64,7 +64,7 @@ export async function cmd(
 	// Bundle with webpack.
 	tasks.push({
 		title: 'Bundle with webpack',
-		task: async() => {
+		task: async () => {
 			const script = `node lib/webpack --output ${outputDir} --run`;
 			const cmd = `cd ${moduleDir} && export NODE_ENV=${NODE_ENV} && ${script}`;
 			await execAsync(cmd, { silent: false });

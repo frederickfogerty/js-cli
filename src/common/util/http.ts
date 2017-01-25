@@ -70,11 +70,11 @@ function del<T>(url: string, headers?: IHttpHeaders): Promise<IResponse<T>> {
 
 function headers(httpHeaders: IHttpHeaders) {
 	return {
-		get: <T>(url: string): Promise<IResponse<T>> => { return get<T>(url, httpHeaders); },
-		put: <T>(url: string, data?: Object): Promise<IResponse<T>> => { return put<T>(url, data, httpHeaders); },
-		post: <T>(url: string, data?: Object): Promise<IResponse<T>> => { return post<T>(url, data, httpHeaders); },
-		patch: <T>(url: string, data?: Object): Promise<IResponse<T>> => { return patch<T>(url, data, httpHeaders); },
-		delete: <T>(url: string): Promise<IResponse<T>> => { return del<T>(url, httpHeaders); },
+		get: <T>(url: string): Promise<IResponse<T>> => get<T>(url, httpHeaders),
+		put: <T>(url: string, data?: Object): Promise<IResponse<T>> => put<T>(url, data, httpHeaders),
+		post: <T>(url: string, data?: Object): Promise<IResponse<T>> => post<T>(url, data, httpHeaders),
+		patch: <T>(url: string, data?: Object): Promise<IResponse<T>> => patch<T>(url, data, httpHeaders),
+		delete: <T>(url: string): Promise<IResponse<T>> => del<T>(url, httpHeaders),
 		headers: (append: IHttpHeaders) => headers(Object.assign(httpHeaders, append)),
 	};
 }

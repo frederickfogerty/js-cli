@@ -9,7 +9,7 @@ export const description = 'Lists the constants for the project.';
 
 const LONGEST_KEY = Object
 	.keys(constants)
-	.reduce((a, b) => { return a.length > b.length ? a : b; })
+	.reduce((a, b) => a.length > b.length ? a : b)
 	.length;
 
 

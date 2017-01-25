@@ -50,7 +50,7 @@ export function execOn(
 	options?: IExecOnModulesOptions,
 
 ): { listr: Listr } {
-	let commandsArray = Array.isArray(commands) ? commands : [commands];
+	const commandsArray = Array.isArray(commands) ? commands : [commands];
 
 	// Setup initial conditions.
 	const config = options || { isConcurrent: true };

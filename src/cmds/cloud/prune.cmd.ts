@@ -72,7 +72,7 @@ export async function cmdDisable(
 		log.info.gray(`  ${log.magenta(uid)} https://${url}`);
 		tasks.push({
 			title: `Delete ${name} - uid:${uid}`,
-			task: async() => await http.delete(http.url(`deployments/${uid}`)),
+			task: async () => await http.delete(http.url(`deployments/${uid}`)),
 		});
 	});
 
