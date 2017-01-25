@@ -28,7 +28,7 @@ declare module 'listr' {
 			skip?: Function;
 		}
 		interface ICustomRenderer {
-			constructor(tasks, options);
+			// constructor (tasks, options);
 			render(): void;
 			end(err: Error): void;
 		}

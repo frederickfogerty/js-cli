@@ -37,7 +37,7 @@
     ]
   },
   "dependencies": {
-    "@fredfogerty/tslint-config": "^3.0.1",
+    "@fredfogerty/tslint-config": "^3.0.2",
     "@types/adm-zip": "^0.4.30",
     "@types/babel-core": "^6.7.14",
     "@types/bluebird": "^3.0.35",
