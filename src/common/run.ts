@@ -22,21 +22,21 @@ export interface IExecOnModulesOptions {
 	isTest?: boolean;
 }
 
-const runTask = async(pkg: constants.IPackageObject, commands: string[] | string) => {
-	if (commands.length === 0) { return null; }
-	if (Array.isArray(commands) && commands.length === 1) {
-		commands = commands[0];
+function createTask(pkg: constants.IPackageObject, commandOrTask: ScriptOrTask): { title: string, task: () => any } {
+	if (isTask(commandOrTask)) {
+		return commandOrTask as Task;
 	}
+	const command: string = commandOrTask as string;
 
-	if (Array.isArray(commands)) {
-		const tasks = commands.map((command) => ({
-			title: command,
-			task: () => execaCommand(command, { cwd: pkg.path }),
-		}));
-		return listr(tasks);
-	} else {
-		return execaCommand(commands, { cwd: pkg.path });
-	}
+	return {
+		title: command,
+		task: () => execaCommand(command as string, { cwd: pkg.path }),
+	};
+}
+
+function createTasks(pkg: constants.IPackageObject, commands: ScriptOrTask[]) {
+	const tasks = commands.map((command) => createTask(pkg, command));
+	return tasks;
 };
 
 
@@ -50,6 +50,7 @@ export function execOn(
 	options?: IExecOnModulesOptions,
 
 ): { listr: Listr } {
+	let commandsArray = Array.isArray(commands) ? commands : [commands];
 
 	// Setup initial conditions.
 	const config = options || { isConcurrent: true };
@@ -60,7 +61,7 @@ export function execOn(
 	// Run the command on each module.
 	const tasks = modules.map((pkg) => ({
 		title: pkg.name,
-		task: () => runTask(pkg, commands),
+		task: () => listr(createTasks(pkg, commandsArray)),
 	}));
 	return {
 		listr: listr(tasks, { concurrent: config.isConcurrent }),
@@ -69,10 +70,18 @@ export function execOn(
 }
 
 
-const makeScript = (script: string) =>
-	(script.includes('yarn') || script.includes('npm')) // Check if already an npm command
+function makeScript(scriptOrTask: ScriptOrTask): ScriptOrTask {
+	if (isTask(scriptOrTask)) { return scriptOrTask; }
+	const script: string = scriptOrTask as string;
+	return (script.includes('yarn') || script.includes('npm')) // Check if already an npm command
 		? script :
 		`yarn run ${script}`;
+}
+
+
+type Task = { title: string, task: (() => Promise<any> | Listr) };
+type ScriptOrTask = string | Task;
+const isTask = (task: ScriptOrTask) => !(typeof task === 'string');
 
 /**
  * Runs the command on a subset of the modules passed which have the command specified in their package.json.
@@ -81,24 +90,30 @@ const makeScript = (script: string) =>
 export function execOnIfScriptExists(
 
 	modules: constants.IPackageObject[],
-	scripts: string | string[],
+	scripts: ScriptOrTask | ScriptOrTask[],
 	options: IExecOnModulesOptions = { isConcurrent: true, isTest: false },
 
 ) {
 	const scriptsArray = Array.isArray(scripts) ? scripts : [scripts];
 
 	const tasks = modules.map((module) => {
-		const availableScripts: string[] = scriptsArray.filter((script) => module.hasScript(script));
-		const scriptCommands = availableScripts.map(makeScript);
+		const availableScripts: ScriptOrTask[] = scriptsArray
+			.filter((script) => isTask(script) ? true : module.hasScript(script as string));
 		if (availableScripts.length === 0) { return null; }
+
+		const scriptCommands = availableScripts.map(makeScript);
+		const tasks = createTasks(module, scriptCommands);
+		if (!tasks) { return null; }
 
 		return {
 			title: module.name,
-			task: () => runTask(module, scriptCommands),
+			task: () => listr(tasks),
+			tasks: tasks,
 		};
 	});
 
 	const tasksWithoutNull = R.reject(R.isNil, tasks);
+	console.log('tasksWithoutNull', tasksWithoutNull);
 
 	return {
 		listr: listr(tasksWithoutNull, { concurrent: options.isConcurrent }),

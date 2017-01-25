@@ -40,18 +40,15 @@ export async function cmd(args: {
 
 	// Install in all modules
 	const installBuildSyncTask = () => {
-		const installCommands = args.options.yolo ? [`build`] : [config.ci.installCmd, `build`];
+		const syncListr = () => createPackageSyncListr().listr;
+		const syncTask = { title: 'Sync', task: syncListr };
+		const commands = args.options.yolo ? [syncTask, `build`] : [config.ci.installCmd, syncTask, `build`];
 
 		const tasks = run.execOnIfScriptExists(
-			currentModules, installCommands, { isConcurrent: args.options.fast },
+			currentModules, commands, { isConcurrent: args.options.fast },
 		).tasks;
 
-		const syncTask = () => createPackageSyncListr().listr;
-		const tasksWithSync = [
-			...tasks,
-			{ title: 'Sync', task: syncTask },
-		];
-		return listr(tasksWithSync, { concurrent: args.options.fast });
+		return listr(tasks, { concurrent: args.options.fast });
 
 	};
 	const installLibsTask = () => run.execOn(libModules, config.ci.installCmd, { isConcurrent: args.options.fast }).listr;
@@ -89,7 +86,7 @@ export async function cmd(args: {
 
 	const installAndBuildTasks = IS_MAIN_BRANCH
 		? [
-			...(!YOLO ? [{ title: 'Install, Build and Sync in order', task: installBuildSyncTask }] : []),
+			{ title: 'Install, Build and Sync in order', task: installBuildSyncTask },
 		]
 		: [
 			{ title: 'Install, Build and Sync in order', task: installBuildSyncTask },
