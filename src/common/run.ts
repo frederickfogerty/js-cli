@@ -113,7 +113,6 @@ export function execOnIfScriptExists(
 	});
 
 	const tasksWithoutNull = R.reject(R.isNil, tasks);
-	console.log('tasksWithoutNull', tasksWithoutNull);
 
 	return {
 		listr: listr(tasksWithoutNull, { concurrent: options.isConcurrent }),
