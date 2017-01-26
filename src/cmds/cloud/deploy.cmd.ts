@@ -84,7 +84,7 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 	cmd += ` --token ${process.env.NOW_TOKEN}`;
 
 	// Look for environment variables.
-	const vars = env.read({ path: fsPath.join(path, '.env') });
+	const vars = env.read({ path: fsPath.join(path, '.env.production') });
 	vars.NODE_ENV = 'production';
 
 	// Print details.
