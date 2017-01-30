@@ -1,7 +1,7 @@
 import * as os from 'os';
 import { R, fs, fsPath } from './libs';
 import config from './config';
-import { pathToPackageObject } from './package'
+import { pathToPackageObject } from './package';
 
 
 export const ROOT_DIR = config.ROOT_DIR;
