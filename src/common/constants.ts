@@ -1,6 +1,7 @@
 import * as os from 'os';
 import { R, fs, fsPath } from './libs';
 import config from './config';
+import { pathToPackageObject } from './package'
 
 
 export const ROOT_DIR = config.ROOT_DIR;
@@ -23,7 +24,6 @@ export interface IPackageObject {
 	name: string;
 	package: IPackage;
 	hasScript(name: string): boolean;
-	refresh(): IPackageObject;
 }
 
 export interface IPackage {
@@ -35,25 +35,7 @@ export interface IPackage {
 }
 
 
-const CORE_SCRIPTS = ['install', 'i'];
-function hasScript(script: string, pkg: { scripts?: { [k: string]: string } }) {
-	const scriptStripped = script.replace('npm', '').replace('yarn', '').trim();
 
-	if (CORE_SCRIPTS.includes(scriptStripped)) { return true; }
-	return (pkg.scripts && pkg.scripts[scriptStripped]) != null;
-}
-
-function pathToPackageObject(path: string) {
-	const packagePath = fsPath.join(path, 'package.json');
-	const pkg = fs.readJsonSync(packagePath) as any;
-	return {
-		name: pkg.name,
-		path,
-		package: pkg,
-		hasScript: (name: string) => hasScript(name, pkg),
-		refresh: () => pathToPackageObject(path),
-	};
-}
 
 /**
  * Decorates an array of paths with the `IPackagesArray` methods.

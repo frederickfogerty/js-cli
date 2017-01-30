@@ -1,3 +1,4 @@
+import { refreshPackage } from '../../common/package';
 import { EventTargetLike } from 'rxjs/observable/FromEventObservable';
 import { listr } from '../../common/util';
 import {
@@ -197,8 +198,8 @@ export function getNewPackageObject(source: constants.IPackageObject, target: co
  */
 function syncPackageVersion(source: constants.IPackageObject, target: constants.IPackageObject): boolean {
 	// Make sure that the package objects are up-to-date.
-	source = source.refresh();
-	target = target.refresh();
+	source = refreshPackage(source);
+	target = refreshPackage(target);
 
 
 	const newPackageObject = getNewPackageObject(source, target);
