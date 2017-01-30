@@ -59,6 +59,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/debounce@^0.0.30":
+  version "0.0.30"
+  resolved "https://registry.yarnpkg.com/@types/debounce/-/debounce-0.0.30.tgz#cf61f37460c61727efeb486a576738818b3ed0ed"
+
 "@types/dotenv@^2.0.19":
   version "2.0.19"
   resolved "https://registry.yarnpkg.com/@types/dotenv/-/dotenv-2.0.19.tgz#31a20215a568a0ba62c47b6a68b771638d9f8711"
@@ -1123,12 +1127,22 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
+date-now@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/date-now/-/date-now-1.0.1.tgz#bb7d086438debe4182a485fb3df3fbfb99d6153c"
+
 dateformat@^1.0.11:
   version "1.0.12"
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-1.0.12.tgz#9f124b67594c937ff706932e4a642cca8dbbfee9"
   dependencies:
     get-stdin "^4.0.1"
     meow "^3.3.0"
+
+debounce@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.0.0.tgz#0948af513d2e4ce407916f8506a423d3f9cf72d8"
+  dependencies:
+    date-now "1.0.1"
 
 debug@^2.1.1, debug@^2.2.0, debug@~2.2.0:
   version "2.2.0"

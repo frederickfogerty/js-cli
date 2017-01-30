@@ -8,6 +8,8 @@ import {
 } from '../../common';
 import * as chokidar from 'chokidar';
 import * as syncLibs from './sync-libs.cmd';
+// Typescript definitions are wrong for debounce, so we need to use require
+const debounce = require('debounce'); // tslint:disable-line
 
 
 export const group = 'dev';
@@ -51,7 +53,10 @@ function watch(pkg: constants.IPackageObject) {
 			});
 		}
 	};
+
+	const syncDebounced = debounce(sync, 100);
+
 	chokidar
 		.watch(`${pkg.path}${PATTERN}`)
-		.on('change', (path) => sync());
+		.on('change', (path) => syncDebounced());
 }
