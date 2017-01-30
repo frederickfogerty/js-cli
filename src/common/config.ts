@@ -49,6 +49,9 @@ const config = {
 		cleanCmd: 'rm -rf node_modules',
 		installCmd: 'yarn',
 	},
+	packageScripts: {
+		BUILD_WATCH_COMMAND: 'build:watch',
+	},
 
 	AUTH0_REFRESH_TOKEN: '',
 	AUTH0_CLIENT_ID: '',
