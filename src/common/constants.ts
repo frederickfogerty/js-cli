@@ -23,6 +23,7 @@ export interface IPackageObject {
 	name: string;
 	package: IPackage;
 	hasScript(name: string): boolean;
+	refresh(): IPackageObject;
 }
 
 export interface IPackage {
@@ -42,6 +43,17 @@ function hasScript(script: string, pkg: { scripts?: { [k: string]: string } }) {
 	return (pkg.scripts && pkg.scripts[scriptStripped]) != null;
 }
 
+function pathToPackageObject(path: string) {
+	const packagePath = fsPath.join(path, 'package.json');
+	const pkg = fs.readJsonSync(packagePath) as any;
+	return {
+		name: pkg.name,
+		path,
+		package: pkg,
+		hasScript: (name: string) => hasScript(name, pkg),
+		refresh: () => pathToPackageObject(path),
+	};
+}
 
 /**
  * Decorates an array of paths with the `IPackagesArray` methods.
@@ -52,16 +64,7 @@ function toPackagesArray(paths: string[]): IPackagesArray {
 
 	// Decorate with methods.
 	result.toPackageObjects = (): IPackageObject[] => {
-		return paths.map((path) => {
-			const packagePath = fsPath.join(path, 'package.json');
-			const pkg = fs.readJsonSync(packagePath) as any;
-			return {
-				name: pkg.name,
-				path,
-				package: pkg,
-				hasScript: (name: string) => hasScript(name, pkg),
-			};
-		});
+		return paths.map(pathToPackageObject);
 	};
 	result.toPackagePaths = (): string[] => paths.map((path) => fsPath.join(path, 'package.json'));
 	result.toPackages = (): IPackage[] => result.toPackageObjects().map((o: IPackageObject) => o.package);
