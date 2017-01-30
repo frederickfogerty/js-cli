@@ -1,3 +1,4 @@
+import { EventTargetLike } from 'rxjs/observable/FromEventObservable';
 import { listr } from '../../common/util';
 import {
 	R,
@@ -159,24 +160,52 @@ async function copyModule(
 	await rsyncExecute(rsync);
 }
 
+function containsPackage(name: string, target: constants.IPackageObject) {
+	const dependenciesSafe = target.package.dependencies || {};
+	const devDependenciesSafe = target.package.devDependencies || {};
+	return (
+		name in (dependenciesSafe)
+		|| name in (devDependenciesSafe)
+	);
+}
+
+export function getNewPackageObject(source: constants.IPackageObject, target: constants.IPackageObject) {
+	if (!containsPackage(source.name, target)) { return target.package; }
+	const dependencies = target.package.dependencies || {};
+	const devDepenencies = target.package.devDependencies || {};
+
+	// Setup initial conditions.
+	const sourceVersion = source.package.version;
+	const dependencyLocation: 'dependencies' | 'devDependencies' = source.name in dependencies
+		? 'dependencies'
+		: 'devDependencies';
+
+	const dependencyObjectContainingSource = (target.package[dependencyLocation] || {});
+
+	const targetVersion = dependencyObjectContainingSource[source.name];
+	if (targetVersion === sourceVersion) { return target.package; }
+
+	// Update the version on the target package.
+	const targetPackage = R.clone(target.package);
+	(targetPackage[dependencyLocation] || {})[source.name] = sourceVersion;
+
+	return targetPackage;
+}
 
 /**
  * Updates the dependency version of the target with the given source package.
  */
 function syncPackageVersion(source: constants.IPackageObject, target: constants.IPackageObject): boolean {
-	// Setup initial conditions.
-	const sourceVersion = source.package.version;
-	const targetVersion = (target.package.dependencies as any)[source.name];
-	if (targetVersion === sourceVersion) { return false; }
+	// Make sure that the package objects are up-to-date.
+	source = source.refresh();
+	target = target.refresh();
 
-	// Update the version on the target package.
-	const targetPackage = R.clone(target.package);
-	(targetPackage.dependencies as any)[source.name] = sourceVersion;
+
+	const newPackageObject = getNewPackageObject(source, target);
 
 	// Save the package.json file.
 	const path = fsPath.join(target.path, 'package.json');
-	const json = JSON.stringify(targetPackage, null, '  ');
-	fs.outputFileSync(path, `${json}\n`);
+	fs.outputJsonSync(path, newPackageObject);
 
 	// Finish up.
 	return true;
