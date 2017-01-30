@@ -37,6 +37,8 @@ async function findRootDir() {
 const DEFAULT_SCRIPT_DIRS = path.join(__dirname, '../cmds/**');
 
 const config = {
+	// Allows the CLI to be run using a different prefix
+	SCRIPT_PREFIX: 'j',
 	ROOT_DIR: '',
 	SCRIPTS_DIRS: [] as string[],
 	ORG_NAME: '',

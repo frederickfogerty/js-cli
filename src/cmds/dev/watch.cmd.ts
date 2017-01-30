@@ -1,4 +1,4 @@
-import { run } from '../../common';
+import { config, run } from '../../common';
 import * as syncWatch from './sync-watch.cmd';
 
 
@@ -10,6 +10,7 @@ export const description = 'Starts `build:watch` and `sync:watch` in tabs.';
 
 export function cmd() {
 	syncWatch.cmd();
-	run.execInNewTab(`j build:watch`);
+	run.execInNewTab(`${config.SCRIPT_PREFIX} build:watch`);
 }
 
+;
