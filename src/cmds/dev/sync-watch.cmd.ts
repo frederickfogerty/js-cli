@@ -54,7 +54,7 @@ function watch(pkg: constants.IPackageObject) {
 		}
 	};
 
-	const syncDebounced = debounce(sync, 100);
+	const syncDebounced = debounce(sync, 500);
 
 	chokidar
 		.watch(`${pkg.path}${PATTERN}`)
