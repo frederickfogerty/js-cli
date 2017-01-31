@@ -1,5 +1,6 @@
 import { IPackageObject } from './constants';
 import { R, fs, fsPath } from './libs';
+import { log } from './util';
 
 const CORE_SCRIPTS = ['install', 'i'];
 /**
@@ -27,14 +28,19 @@ export function hasScript(script: string, pkg: { scripts?: { [k: string]: string
 
 export function pathToPackageObject(path: string) {
 	const packagePath = fsPath.join(path, 'package.json');
-	const pkg = fs.readJsonSync(packagePath) as any;
-	return {
-		name: pkg.name,
-		path,
-		package: pkg,
-		hasScript: (name: string) => hasScript(name, pkg),
-		refresh: () => pathToPackageObject(path),
-	};
+	try {
+		const pkg = fs.readJsonSync(packagePath) as any;
+		return {
+			name: pkg.name,
+			path,
+			package: pkg,
+			hasScript: (name: string) => hasScript(name, pkg),
+			refresh: () => pathToPackageObject(path),
+		};
+	} catch (e) {
+		log.info.cyan(`Error when reading package json for path ${path}`);
+		throw e;
+	}
 }
 
 export function refreshPackage(packageObject: IPackageObject) {
