@@ -35,6 +35,7 @@ declare module 'listr' {
 		interface IListrOptions {
 			renderer?: string | ICustomRenderer;
 			concurrent?: boolean;
+			exitOnError?: boolean;
 		}
 	}
 	class Listr {
