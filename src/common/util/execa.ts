@@ -21,19 +21,15 @@ export const execa = (cmd: string, args?: string[], opts?: ExecFileOptions) => {
  * Executes a command by splitting it into the relevant file and arg sections
  */
 export const execaCommand = (cmd: string, opts: ExecFileOptions & { promise?: boolean } = {}) => {
-	// const commands = cmd.split(' ');
-	// const file = commands[0];
-	// const args = commands.slice(1);
 	const cp = Execa.shell(cmd, opts);
 
-	const data$ = Observable.merge(
-		streamToObservable(cp.stdout.pipe(split()), { await: cp }),
-		streamToObservable(cp.stderr.pipe(split()), { await: cp }),
-	).filter(Boolean);
-
 	if (opts.promise) {
-		return observableToPromise(data$);
+		return cp;
 	} else {
+		const data$ = Rx.Observable.merge(
+			streamToObservable(cp.stdout.pipe(split()), { await: cp }),
+			streamToObservable(cp.stderr.pipe(split()), { await: cp }),
+		).filter(Boolean);
 		return data$;
 	}
 };
