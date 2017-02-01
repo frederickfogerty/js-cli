@@ -1,5 +1,5 @@
-import { SCRIPTS_DIR } from './constants';
 import { projectPath } from './util';
+import { log } from './util/log';
 import * as path from 'path';
 import * as fse from 'fs-extra-promise';
 import * as fsPath from 'path';
@@ -9,13 +9,13 @@ import * as dotenv from 'dotenv';
 import * as R from 'ramda';
 import * as u from 'updeep';
 
-const CONFIG_FILE = 'js-cli-config.js';
+const CONFIG_FILES = ['js-cli-config.js', 'cli.config.js'];
 
 async function checkDirIsRoot(path: string) {
 	const files = await fse.readdirAsync(path);
 	let found = false;
 	files.forEach((file) => {
-		if (file === CONFIG_FILE) { found = true; }
+		if (CONFIG_FILES.includes(file)) { found = true; }
 	});
 
 	return found;
@@ -31,12 +31,14 @@ async function findRootDir() {
 		dirPath = path.join(dirPath, '../');
 	}
 
-	throw new Error(`Root directory not found. Have you created a \'${CONFIG_FILE}\' file in the root of your project?`);
+	const configFilesString = CONFIG_FILES.map((config) => `'${config}'`).join(' or ');
+
+	throw new Error(`Root directory not found. Have you created a ${configFilesString} file in the root of your project?`);
 }
 
 const DEFAULT_SCRIPT_DIRS = path.join(__dirname, '../cmds/**');
 
-const config = {
+let config = {
 	// Allows the CLI to be run using a different prefix
 	SCRIPT_PREFIX: 'j',
 	ROOT_DIR: '',
@@ -65,12 +67,25 @@ const config = {
 
 export default config;
 
+function getProjectConfig() {
+	let projectConfig = {};
+	CONFIG_FILES.forEach((configFile) => {
+		try {
+			const path = fsPath.join(config.ROOT_DIR, configFile);
+			projectConfig = require(path);
+		} catch (e) {
+			// swallowed
+		}
+	});
+	return projectConfig;
+}
+
 export async function init() {
 	// Pre-processing
 	config.ROOT_DIR = await findRootDir();
 
 	// Override from consumer's config
-	const projectConfig = require(fsPath.join(config.ROOT_DIR, CONFIG_FILE));
+	const projectConfig = getProjectConfig();
 	Object.assign(config, u(projectConfig, config));
 
 	// Post-processing
