@@ -1,3 +1,4 @@
+import { getModulesFromParams } from '../../common/params';
 import {
 	fs,
 	fsPath,
@@ -16,37 +17,55 @@ export const name = 'build:watch';
 export const alias = 'bw';
 export const description = 'Starts TypeScript/Babel build-watchers for all modules.';
 
-const hasBabel = (pkg: constants.IPackageObject) => fs.existsSync(fsPath.join(pkg.path, '.babelrc'));
-
 const TS_MODULES = constants
 	.MODULE_DIRS
 	.toPackageObjects()
 	.filter((pkg) => pkg.name.startsWith(config.ORG_NAME))
 	.filter((pkg) => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
 
+const hasBuildWatch = (pkg: constants.IPackageObject) => pkg.hasScript(config.packageScripts.BUILD_WATCH_COMMAND);
 
-export function cmd() {
-	printTitle('TypeScript/Babel Build Watchers');
+export function cmd(args: { params: string[] }) {
+	printTitle('TypeScript Build Watchers');
+
+	const modules = getModulesFromParams(args.params, TS_MODULES.map((pkg) => pkg.path))
+		.toPackageObjects()
+		.filter((pkg) => pkg.name.startsWith(config.ORG_NAME))
+		.filter((pkg) => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
+
+	const modulesWithBuildWatch = modules.filter(hasBuildWatch);
+	const modulesWithoutBuildWatch = modules
+		.filter((pkg) => !hasBuildWatch(pkg));
+
+	if (modulesWithBuildWatch.length === 0) {
+		log.info.yellow('⚠️  No matching modules found.\n');
+		return;
+	}
 
 	// Print list.
-	TS_MODULES.forEach((pkg) => {
-		// console.log('pkg', pkg);
-		log.info.blue(` - ${log.magenta(pkg.name)}${hasBabel(pkg) ? log.yellow(` (babel)`) : ''}`);
+	modules.forEach((pkg) => {
+		log.info.blue(` - ${log.magenta(pkg.name)}`);
 	});
 	log.info();
 
+
+	if (modulesWithoutBuildWatch.length > 0) {
+		log.info.gray(`Not watching: (no ${config.packageScripts.BUILD_WATCH_COMMAND} script found)`);
+		modulesWithoutBuildWatch.forEach((pkg) => {
+			log.info.gray(` - ${pkg.name}`);
+		});
+		log.info();
+	}
+
 	// Start the watchers.
-	TS_MODULES.forEach((pkg) => {
-		watchTypescript(pkg);
-		// console.log('pkg.name', pkg.name);
-		// console.log('pkg.path', pkg.path);
-		if (hasBabel(pkg)) { watchBabel(pkg); }
-	});
+	modules.forEach(watchTypescript);
 }
 
 
 
 function watchTypescript(pkg: constants.IPackageObject) {
+	if (!pkg.hasScript(config.packageScripts.BUILD_WATCH_COMMAND)) { return; }
+
 	const cmd = `cd ${pkg.path} && yarn run ${config.packageScripts.BUILD_WATCH_COMMAND}`;
 	run
 		.exec$(cmd)
@@ -59,36 +78,3 @@ function watchTypescript(pkg: constants.IPackageObject) {
 		});
 }
 
-
-
-function watchBabel(pkg: constants.IPackageObject) {
-	// Setup initial conditions.
-	const tsconfig = require(fsPath.join(pkg.path, 'tsconfig.json'));
-	const tsDir = fsPath.join(pkg.path, tsconfig.compilerOptions.outDir);
-
-	// Build: TS => ES5 (babel).
-	const buildBabel = (inputFile: string) => {
-		const fileName = fsPath.basename(inputFile, '.js');
-		const relativeDir = fsPath.dirname(inputFile.substr(tsDir.length, inputFile.length));
-		const sourceDir = fsPath.dirname(inputFile);
-		const targetDir = fsPath.join(pkg.path, 'lib', relativeDir);
-		const targetFile = fsPath.join(targetDir, `${fileName}.js`);
-
-		// Transpile and save JS.
-		const js = babelCore.transformFileSync(inputFile).code;
-		fs.outputFileSync(targetFile, js);
-
-		// Copy the typescript definition file.
-		fs.copySync(
-			fsPath.join(sourceDir, `${fileName}.d.ts`), // from.
-			fsPath.join(targetDir, `${fileName}.d.ts`),  // to.
-		);
-
-		log.info.yellow(`  [babel] ${pkg.name} ${log.gray(fsPath.join(relativeDir, `${fileName}.js`))}`);
-	};
-
-	// Watch for files in the tempoarary typescript build folder.
-	chokidar
-		.watch(`${tsDir}/**/*.js`)
-		.on('change', (path) => buildBabel(path));
-}
