@@ -49,7 +49,7 @@ export async function cmd(
 		.MODULE_DIRS
 		.toPackageObjects()
 		.filter((pkg) => isScriptName ? pkg.hasScript(script) : true);
-	await run.execOn(modules, cmd, { isConcurrent: true, isTest }).listr.run();
+	await run.execOn(modules, cmd, { isConcurrent: true }).listr.run();
 
 	if (modules.length === 0) {
 		log.info.gray(`No modules with the script ${log.magenta(script)}.\n`);

@@ -1,3 +1,4 @@
+import { getModulesFromParams } from '../../common/params';
 import { refreshPackage } from '../../common/package';
 import { EventTargetLike } from 'rxjs/observable/FromEventObservable';
 import { listr } from '../../common/util';
@@ -36,8 +37,8 @@ export async function cmd(
 	const { length, listr } = createPackageSyncListr(args);
 	await listr.run();
 	const elapsed = startedAt.elapsed();
-	const timeStamp = moment().format('h:mm:ssa');
-	log.info.green(`Synced ${length} modules in ${elapsed} ${log.gray(timeStamp)}`);
+
+	// log.info.green(`Synced ${length} modules in ${elapsed} ${log.gray(timeStamp)}`);
 }
 
 
@@ -47,7 +48,7 @@ export function createPackageSyncListr(args?: {
 }) {
 	// Setup initial conditions.
 	const params = (args && args.params) || [];
-	// printTitle('Sync Libs');
+	const modules = getModulesFromParams(params);
 
 	const canCopy = (pkg: constants.IPackageObject) => {
 		// Don't copy simply configuration modules (like 'babel' or 'typescript')
@@ -59,7 +60,7 @@ export function createPackageSyncListr(args?: {
 
 	const localDependencies = (pkg: constants.IPackage): constants.IPackageObject[] => {
 		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter((name) => name.startsWith(config.ORG_NAME));
-		return constants.MODULE_DIRS
+		return modules
 			.toPackageObjects()
 			.filter((item) => item.name !== pkg.name)
 			.filter((item) => R.contains(item.name, dependencies))
@@ -86,7 +87,8 @@ export function createPackageSyncListr(args?: {
 	const tasks = dependencyOrder.map((target) => {
 		const targetName = log.magenta(target.name);
 		const sourceNames = target.localDependencies.map((source) => log.blue(source.name)).join(log.blue(', '));
-		const title = `Update ${targetName} with ${sourceNames}`;
+		const timeStamp = log.gray(moment().format('h:mm:ss a'));
+		const title = `Update ${targetName} with ${sourceNames} - ${timeStamp}`;
 
 		const task = async () => {
 			await Promise.all(target.localDependencies.map(async (source) => {

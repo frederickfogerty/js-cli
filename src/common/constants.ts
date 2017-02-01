@@ -40,7 +40,7 @@ export interface IPackage {
 /**
  * Decorates an array of paths with the `IPackagesArray` methods.
  */
-function toPackagesArray(paths: string[]): IPackagesArray {
+export function toPackagesArray(paths: string[]): IPackagesArray {
 	paths = R.clone(paths);
 	const result = paths as any;
 

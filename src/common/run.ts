@@ -19,10 +19,14 @@ export interface IExecOnModulesResult {
 }
 export interface IExecOnModulesOptions {
 	isConcurrent?: boolean;
-	isTest?: boolean;
+	exitOnError?: boolean;
 }
 
-function createTask(pkg: constants.IPackageObject, commandOrTask: ScriptOrTask): { title: string, task: () => any } {
+function createTask(
+	pkg: constants.IPackageObject,
+	commandOrTask: ScriptOrTask,
+	opts: { promise?: boolean } = {},
+): { title: string, task: () => any } {
 	if (isTask(commandOrTask)) {
 		return commandOrTask as Task;
 	}
@@ -30,12 +34,12 @@ function createTask(pkg: constants.IPackageObject, commandOrTask: ScriptOrTask):
 
 	return {
 		title: command,
-		task: () => execaCommand(command as string, { cwd: pkg.path }),
+		task: () => execaCommand(command as string, { cwd: pkg.path, promise: opts.promise }),
 	};
 }
 
-function createTasks(pkg: constants.IPackageObject, commands: ScriptOrTask[]) {
-	const tasks = commands.map((command) => createTask(pkg, command));
+function createTasks(pkg: constants.IPackageObject, commands: ScriptOrTask[], opts: { promise?: boolean } = {}) {
+	const tasks = commands.map((command) => createTask(pkg, command, opts));
 	return tasks;
 };
 
@@ -53,18 +57,24 @@ export function execOn(
 	const commandsArray = Array.isArray(commands) ? commands : [commands];
 
 	// Setup initial conditions.
-	const config = options || { isConcurrent: true };
+	const config = options || { isConcurrent: true, exitOnError: true };
 
 	// Ensure the modules are in depth-first order.
 	modules = deps.orderByDepth(modules);
+	// const exitOnError = config.exitOnError == null ? true : config.exitOnError;
+	const exitOnError: boolean = true; // Until implemented properly
+	const execShouldBePromise = !exitOnError;
 
 	// Run the command on each module.
 	const tasks = modules.map((pkg) => ({
 		title: pkg.name,
-		task: () => listr(createTasks(pkg, commandsArray)),
+		task: () => listr(createTasks(pkg, commandsArray, { promise: true })),
 	}));
 	return {
-		listr: listr(tasks, { concurrent: config.isConcurrent }),
+		listr: listr(tasks, {
+			concurrent: config.isConcurrent,
+			exitOnError, // needs to default to true if undefined
+		}),
 	};
 
 }
@@ -91,7 +101,7 @@ export function execOnIfScriptExists(
 
 	modules: constants.IPackageObject[],
 	scripts: ScriptOrTask | ScriptOrTask[],
-	options: IExecOnModulesOptions = { isConcurrent: true, isTest: false },
+	options: IExecOnModulesOptions = { isConcurrent: true },
 
 ) {
 	const scriptsArray = Array.isArray(scripts) ? scripts : [scripts];
@@ -118,13 +128,6 @@ export function execOnIfScriptExists(
 		listr: listr(tasksWithoutNull, { concurrent: options.isConcurrent }),
 		tasks: tasksWithoutNull,
 	};
-
-	// const filteredModules = modules.filter((pkg) => pkg.hasScript(scriptsArray));
-	// return execOn(
-	// 	filteredModules,
-	// 	`yarn run ${scripts}`,
-	// 	{ isConcurrent: options.isConcurrent, isTest: options.isTest },
-	// );
 }
 
 

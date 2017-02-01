@@ -1,3 +1,4 @@
+import { getModulesFromParams } from '../../common/params';
 import { R, run, constants, config, log, printTitle, time } from '../../common';
 
 export const name = 'install';
@@ -6,13 +7,13 @@ export const alias = 'i';
 export const description = 'Run yarn:install on all modules';
 export const args = {};
 
-export async function cmd() {
-    printTitle('Installing dependencies');
+export async function cmd(args: { params: string[] }) {
+	printTitle('Installing dependencies');
 
-    const cmd = config.USE_YARN ? 'yarn' : 'npm i';
+	const cmd = config.USE_YARN ? 'yarn' : 'npm i';
 
-    const modules = constants.MODULE_DIRS
-        .toPackageObjects();
-    await run.execOn(modules, cmd, { isConcurrent: true }).listr.run();
+	const modules = getModulesFromParams(args.params)
+		.toPackageObjects();
 
+	await run.execOn(modules, cmd, { isConcurrent: true, exitOnError: false }).listr.run();
 }

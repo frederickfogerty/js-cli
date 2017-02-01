@@ -5,6 +5,7 @@ import {
 	log,
 	printTitle,
 	deps,
+	getModulesFromParams,
 } from '../../common';
 import * as chokidar from 'chokidar';
 import * as syncLibs from './sync-libs.cmd';
@@ -28,9 +29,9 @@ export async function cmd(
 ) {
 
 	printTitle('Sync on change');
+	const params = (args && args.params) || [];
 
-	const modules = constants
-		.MODULE_DIRS
+	const modules = getModulesFromParams(params)
 		.toPackageObjects()
 		.filter((pkg) => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
 
