@@ -27,6 +27,10 @@ export const args = {
 };
 
 
+/**
+ * Sync libs
+ * args.params = modules to sync FROM.
+ */
 export async function cmd(
 	args: {
 		params: string[],
@@ -37,8 +41,6 @@ export async function cmd(
 	const { length, listr } = createPackageSyncListr(args);
 	await listr.run();
 	const elapsed = startedAt.elapsed();
-
-	// log.info.green(`Synced ${length} modules in ${elapsed} ${log.gray(timeStamp)}`);
 }
 
 
@@ -48,7 +50,7 @@ export function createPackageSyncListr(args?: {
 }) {
 	// Setup initial conditions.
 	const params = (args && args.params) || [];
-	const modules = getModulesFromParams(params);
+	const syncSources = getModulesFromParams(params);
 
 	const canCopy = (pkg: constants.IPackageObject) => {
 		// Don't copy simply configuration modules (like 'babel' or 'typescript')
@@ -58,33 +60,27 @@ export function createPackageSyncListr(args?: {
 		// return hasFolder('src') || hasFolder('pages');
 	};
 
-	const localDependencies = (pkg: constants.IPackage): constants.IPackageObject[] => {
+	const findDependenciesOfModule = (pkg: constants.IPackage): constants.IPackageObject[] => {
 		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter((name) => name.startsWith(config.ORG_NAME));
-		return modules
+		return syncSources
 			.toPackageObjects()
 			.filter((item) => item.name !== pkg.name)
 			.filter((item) => R.contains(item.name, dependencies))
 			.filter((item) => canCopy(item));
 	};
 
-	const includeModule = (moduleName: string): boolean => {
-		if (params.length === 0) { return true; }
-		return R.any((pattern) => isFuzzyMatch(pattern, moduleName), params);
-	};
-
-	const dependencyOrder = deps
+	const syncTargets = deps
 		.orderByDepth(constants.MODULE_DIRS.toPackageObjects())
-		.filter((item) => includeModule(item.name))
 		.map((item) => ({
 			name: item.name,
 			path: item.path,
-			localDependencies: localDependencies(item.package),
+			localDependencies: findDependenciesOfModule(item.package),
 			package: item,
 		}))
 		.filter((item) => item.localDependencies.length > 0);
 
 	// Copy local dependencies into each module.
-	const tasks = dependencyOrder.map((target) => {
+	const tasks = syncTargets.map((target) => {
 		const targetName = log.magenta(target.name);
 		const sourceNames = target.localDependencies.map((source) => log.blue(source.name)).join(log.blue(', '));
 		const timeStamp = log.gray(moment().format('h:mm:ss a'));
@@ -106,7 +102,7 @@ export function createPackageSyncListr(args?: {
 
 	// Finish up.
 	return {
-		length: dependencyOrder.length,
+		length: syncTargets.length,
 		listr: listr(tasks),
 	};
 }
@@ -146,8 +142,8 @@ async function copyModule(
 		'.babelrc',
 		'.tmp',
 		'.npmignore',
-		'tsconfig.json',
-		'tslint.json',
+		// 'tsconfig.json',
+		// 'tslint.json',
 		'typings.json',
 	];
 	const FROM_DIR = fsPath.join(from.path, '/');

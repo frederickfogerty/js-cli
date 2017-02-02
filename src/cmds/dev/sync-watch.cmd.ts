@@ -37,6 +37,7 @@ export async function cmd(
 
 	modules.forEach((pkg) => {
 		log.info.blue(` - ${log.magenta(pkg.name)}${log.gray(PATTERN)}`);
+		sync(pkg); // Perform a sync on startup
 		watch(pkg);
 	});
 	log.info();
@@ -44,20 +45,17 @@ export async function cmd(
 
 
 
+function sync(pkg: constants.IPackageObject) {
+	syncLibs.cmd({
+		params: [pkg.name],
+		options: {},
+	});
+};
 function watch(pkg: constants.IPackageObject) {
-	const sync = () => {
-		const pkgs = deps.dependsOn(pkg);
-		if (pkgs.length > 0) {
-			syncLibs.cmd({
-				params: pkgs.map((pkg) => pkg.name),
-				options: {},
-			});
-		}
-	};
 
 	const syncDebounced = debounce(sync, 500);
 
 	chokidar
 		.watch(`${pkg.path}${PATTERN}`)
-		.on('change', (path) => syncDebounced());
+		.on('change', (path) => syncDebounced(pkg));
 }
