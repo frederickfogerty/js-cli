@@ -21,7 +21,7 @@ export const description = 'Starts TypeScript/Babel build-watchers for all modul
 const TS_MODULES = constants
 	.MODULE_DIRS
 	.toPackageObjects()
-	.filter(pkg => startsWithOrgName(pkg.name))
+	.filter((pkg) => startsWithOrgName(pkg.name))
 	.filter((pkg) => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
 
 const hasBuildWatch = (pkg: constants.IPackageObject) => pkg.hasScript(config.packageScripts.BUILD_WATCH_COMMAND);
@@ -31,7 +31,7 @@ export function cmd(args: { params: string[] }) {
 
 	const modules = getModulesFromParams(args.params, TS_MODULES.map((pkg) => pkg.path))
 		.toPackageObjects()
-		.filter(pkg => startsWithOrgName(pkg.name))
+		.filter((pkg) => startsWithOrgName(pkg.name))
 		.filter((pkg) => fs.existsSync(fsPath.join(pkg.path, 'tsconfig.json')));
 
 	const modulesWithBuildWatch = modules.filter(hasBuildWatch);
