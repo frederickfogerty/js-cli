@@ -1,3 +1,4 @@
+import { startsWithOrgName } from '../../common/packages';
 import { getModulesFromParams } from '../../common/params';
 import { refreshPackage } from '../../common/package';
 import { EventTargetLike } from 'rxjs/observable/FromEventObservable';
@@ -61,7 +62,7 @@ export function createPackageSyncListr(args?: {
 	};
 
 	const findDependenciesOfModule = (pkg: constants.IPackage): constants.IPackageObject[] => {
-		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter((name) => name.startsWith(config.ORG_NAME));
+		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter(startsWithOrgName);
 		return syncSources
 			.toPackageObjects()
 			.filter((item) => item.name !== pkg.name)

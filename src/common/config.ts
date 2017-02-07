@@ -43,7 +43,7 @@ let config = {
 	SCRIPT_PREFIX: 'j',
 	ROOT_DIR: '',
 	SCRIPTS_DIRS: [] as string[],
-	ORG_NAME: '',
+	ORG_NAMES: [''],
 	USE_YARN: true,
 	ENV_FILES: [],
 	NOW_TOKEN: '',

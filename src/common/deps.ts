@@ -1,3 +1,4 @@
+import { startsWithOrgName } from './packages';
 import { R, constants, config } from '../common';
 import * as toposort from 'toposort';
 
@@ -12,7 +13,7 @@ function toDependenciesArray(pkg: constants.IPackage) {
 	const deps = mergeDependencies(pkg);
 	const result = Object
 		.keys(deps)
-		.filter((name) => name.startsWith(config.ORG_NAME))
+		.filter(startsWithOrgName)
 		.map((name) => [pkg.name, name]);
 	return result.length === 0
 		? [[pkg.name]]
@@ -25,7 +26,7 @@ function toDependenciesArray(pkg: constants.IPackage) {
  */
 export function orderByDepth(packages: constants.IPackageObject[]): constants.IPackageObject[] {
 	const graph = packages
-		.filter((item) => item.name.startsWith(config.ORG_NAME))
+		.filter((item) => startsWithOrgName(item.name))
 		.map((item) => toDependenciesArray(item.package))
 		.reduce((acc: any[], items: any[]) => {
 			items.forEach((item) => acc.push(item));

@@ -46,3 +46,4 @@ export function pathToPackageObject(path: string) {
 export function refreshPackage(packageObject: IPackageObject) {
 	return pathToPackageObject(packageObject.path);
 }
+
