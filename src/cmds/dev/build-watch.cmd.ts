@@ -44,7 +44,7 @@ export function cmd(args: { params: string[] }) {
 	}
 
 	// Print list.
-	modules.forEach((pkg) => {
+	modulesWithBuildWatch.forEach((pkg) => {
 		log.info.blue(` - ${log.magenta(pkg.name)}`);
 	});
 	log.info();
