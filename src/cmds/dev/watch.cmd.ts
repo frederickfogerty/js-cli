@@ -9,8 +9,6 @@ export const description = 'Starts `build:watch` and `sync:watch` in tabs.';
 
 
 export function cmd() {
-	syncWatch.cmd();
+	run.execInNewTab(`${config.SCRIPT_PREFIX} sync:watch`);
 	run.execInNewTab(`${config.SCRIPT_PREFIX} build:watch`);
 }
-
-;
