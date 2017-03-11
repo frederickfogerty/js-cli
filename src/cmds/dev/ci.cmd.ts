@@ -1,3 +1,4 @@
+import { orderByDepth } from '../../common/deps';
 import {
 	IS_CI,
 	IS_MAIN_BRANCH,
@@ -44,8 +45,9 @@ export async function cmd(args: {
 		const syncTask = { title: 'Sync', task: syncListr };
 		const commands = args.options.yolo ? [syncTask, `build`] : [config.ci.installCmd, syncTask, `build`];
 
+		const modulesInOrder = orderByDepth(currentModules);
 		const tasks = run.execOnIfScriptExists(
-			currentModules, commands, { isConcurrent: args.options.fast },
+			modulesInOrder, commands, { isConcurrent: args.options.fast },
 		).tasks;
 
 		return listr(tasks, { concurrent: args.options.fast });
