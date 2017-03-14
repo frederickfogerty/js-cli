@@ -16,11 +16,11 @@ declare module 'execa' {
 }
 
 declare module 'pad-right' {
-	interface PadRight {
+	interface IPadRight {
 		(input: string, padding: number, paddingCharacter?: string): string;
 	}
-	const PadRight: PadRight;
-	export = PadRight;
+	const PadRight: IPadRight;
+	export = IPadRight;
 }
 
 
