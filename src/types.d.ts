@@ -1,3 +1,4 @@
+// tslint:disable
 declare module 'toposort' {
 	type Node = string | number;
 	interface IToposort {
@@ -16,11 +17,11 @@ declare module 'execa' {
 }
 
 declare module 'pad-right' {
-	interface IPadRight {
+	interface PadRight {
 		(input: string, padding: number, paddingCharacter?: string): string;
 	}
-	const PadRight: IPadRight;
-	export = IPadRight;
+	const PadRight: PadRight;
+	export = PadRight;
 }
 
 
