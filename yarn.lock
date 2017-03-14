@@ -2464,11 +2464,7 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-listr-silent-renderer@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/listr-silent-renderer/-/listr-silent-renderer-1.0.0.tgz#c097f02747d139f07852abe418a2d6e18c83f7ee"
-
-listr-silent-renderer@^1.1.1:
+listr-silent-renderer@^1.0.0, listr-silent-renderer@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/listr-silent-renderer/-/listr-silent-renderer-1.1.1.tgz#924b5a3757153770bf1a8e3fbf74b8bbf3f9242e"
 
@@ -3112,6 +3108,12 @@ package-json@^2.0.0:
     registry-auth-token "^3.0.1"
     registry-url "^3.0.3"
     semver "^5.1.0"
+
+pad-right@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/pad-right/-/pad-right-0.2.2.tgz#6fbc924045d244f2a2a244503060d3bfc6009774"
+  dependencies:
+    repeat-string "^1.5.2"
 
 parse-glob@^3.0.4:
   version "3.0.4"

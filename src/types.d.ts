@@ -15,6 +15,14 @@ declare module 'execa' {
 	export = execa;
 }
 
+declare module 'pad-right' {
+	interface PadRight {
+		(input: string, padding: number, paddingCharacter?: string): string;
+	}
+	const PadRight: PadRight;
+	export = PadRight;
+}
+
 
 
 

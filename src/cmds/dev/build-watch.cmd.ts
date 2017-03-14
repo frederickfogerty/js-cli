@@ -1,3 +1,4 @@
+import { execaCommand } from '../../common/util';
 import { startsWithOrgName } from '../../common/packages';
 import { getModulesFromParams } from '../../common/params';
 import {
@@ -11,6 +12,7 @@ import {
 } from '../../common';
 import * as chokidar from 'chokidar';
 import * as babelCore from 'babel-core';
+import * as rightPad from 'pad-right';
 
 
 export const group = 'dev';
@@ -58,23 +60,28 @@ export function cmd(args: { params: string[] }) {
 		log.info();
 	}
 
+	const prefixLength = modules.map((pkg) => pkg.name.length).reduce((p, v) => Math.max(p, v), 0);
+
 	// Start the watchers.
-	modules.forEach(watchTypescript);
+	modules.forEach((module) => watchTypescript(module, { prefixLength }));
 }
 
 
 
-function watchTypescript(pkg: constants.IPackageObject) {
+function watchTypescript(
+	pkg: constants.IPackageObject,
+	{ prefixLength = 10 }: { prefixLength?: number } = {},
+) {
 	if (!pkg.hasScript(config.packageScripts.BUILD_WATCH_COMMAND)) { return; }
 
 	const cmd = `cd ${pkg.path} && yarn run ${config.packageScripts.BUILD_WATCH_COMMAND}`;
-	run
-		.exec$(cmd)
-		.forEach((e) => {
-			const stdout = (e.stdout || '').replace(/\n$/, '');
+	execaCommand(cmd)
+		.forEach((e: string) => {
+			const stdout = (e || '').replace(/\n$/, '');
+			const nameWithPadding = rightPad(pkg.name, prefixLength, ' ');
 			const prefix = stdout.includes('error')
-				? log.red(`\n💥  TypeScript Error in ${log.yellow(pkg.name)}`)
-				: log.blue(pkg.name);
+				? log.red(`${log.yellow(nameWithPadding)}`)
+				: log.blue(nameWithPadding);
 			log.info(`${prefix} ${stdout}`);
 		});
 }
