@@ -12,7 +12,9 @@ export async function forModule(
 	message = 'Module',
 	opts: { allowAll?: boolean } = { allowAll: true },
 ): Promise<constants.IPackageObject[]> {
-	const choices = (opts.allowAll ? [ALL_MODULES_LABEL] : []).concat(pkgs.map((pkg) => pkg.name));
+	const choices = (opts.allowAll ? [ALL_MODULES_LABEL] : []).concat(
+		pkgs.map(pkg => pkg.name),
+	);
 
 	const confirm = {
 		type: 'list',
@@ -20,16 +22,18 @@ export async function forModule(
 		message,
 		choices,
 	};
-	const { name } = (await inquirer.prompt(confirm));
-	return name === ALL_MODULES_LABEL ? pkgs : [R.find(R.propEq('name', name), pkgs)];
+	const { name } = await inquirer.prompt(confirm);
+	return name === ALL_MODULES_LABEL
+		? pkgs
+		: [R.find(R.propEq('name', name), pkgs)];
 }
-
-
 
 /**
  * Prompts the user whether they sure they want to continue.
  */
-export async function confirm(message: string = 'Are you sure?'): Promise<boolean> {
+export async function confirm(
+	message: string = 'Are you sure?',
+): Promise<boolean> {
 	const confirm = {
 		type: 'confirm',
 		name: 'result',
@@ -38,4 +42,3 @@ export async function confirm(message: string = 'Are you sure?'): Promise<boolea
 	const { result } = (await inquirer.prompt(confirm)) as any;
 	return result;
 }
-

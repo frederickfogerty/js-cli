@@ -18,7 +18,6 @@ import {
 } from '../../common';
 import * as Rsync from 'rsync';
 
-
 export const group = 'dev';
 export const name = 'sync:libs';
 export const alias = 'sl';
@@ -27,27 +26,20 @@ export const args = {
 	'[module names]': 'Optional names of libs to include. Default: all',
 };
 
-
 /**
  * Sync libs
  * args.params = modules to sync FROM.
  */
-export async function cmd(
-	args: {
-		params: string[],
-		options: {},
-	},
-) {
+export async function cmd(args: { params: string[]; options: {} }) {
 	const startedAt = time.timer();
 	const { length, listr } = createPackageSyncListr(args);
 	await listr.run();
 	const elapsed = startedAt.elapsed();
 }
 
-
 export function createPackageSyncListr(args?: {
-	params: string[],
-	options: {},
+	params: string[];
+	options: {};
 }) {
 	// Setup initial conditions.
 	const params = (args && args.params) || [];
@@ -56,42 +48,51 @@ export function createPackageSyncListr(args?: {
 	const canCopy = (pkg: constants.IPackageObject) => {
 		// Don't copy simply configuration modules (like 'babel' or 'typescript')
 		// that do not have lib output.
-		const hasFolder = (folder: string) => fs.existsSync(fsPath.join(pkg.path, folder));
+		const hasFolder = (folder: string) =>
+			fs.existsSync(fsPath.join(pkg.path, folder));
 		return true;
 		// return hasFolder('src') || hasFolder('pages');
 	};
 
-	const findDependenciesOfModule = (pkg: constants.IPackage): constants.IPackageObject[] => {
-		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter(startsWithOrgName);
+	const findDependenciesOfModule = (
+		pkg: constants.IPackage,
+	): constants.IPackageObject[] => {
+		const dependencies = Object.keys(deps.mergeDependencies(pkg)).filter(
+			startsWithOrgName,
+		);
 		return syncSources
 			.toPackageObjects()
-			.filter((item) => item.name !== pkg.name)
-			.filter((item) => R.contains(item.name, dependencies))
-			.filter((item) => canCopy(item));
+			.filter(item => item.name !== pkg.name)
+			.filter(item => R.contains(item.name, dependencies))
+			.filter(item => canCopy(item));
 	};
 
 	const syncTargets = deps
 		.orderByDepth(constants.MODULE_DIRS.toPackageObjects())
-		.map((item) => ({
+		.map(item => ({
 			name: item.name,
 			path: item.path,
 			localDependencies: findDependenciesOfModule(item.package),
 			package: item,
 		}))
-		.filter((item) => item.localDependencies.length > 0);
+		.filter(item => item.localDependencies.length > 0);
 
 	// Copy local dependencies into each module.
-	const tasks = syncTargets.map((target) => {
+	const tasks = syncTargets.map(target => {
 		const targetName = log.magenta(target.name);
-		const sourceNames = target.localDependencies.map((source) => log.blue(source.name)).join(log.blue(', '));
+		const sourceNames = target.localDependencies
+			.map(source => log.blue(source.name))
+			.join(log.blue(', '));
 		const timeStamp = log.gray(moment().format('h:mm:ss a'));
 		const title = `Update ${targetName} with ${sourceNames} - ${timeStamp}`;
 
 		const task = async () => {
-			await Promise.all(target.localDependencies.map(async (source) => {
-				await copyModule(source, target);
-				syncPackageVersion(source, target.package);
-			}));
+			await Promise.all(
+				target.localDependencies.map(async source => {
+					await copyModule(source, target);
+					syncPackageVersion(source, target.package);
+				}),
+			);
 		};
 
 		return {
@@ -100,7 +101,6 @@ export function createPackageSyncListr(args?: {
 		};
 	});
 
-
 	// Finish up.
 	return {
 		length: syncTargets.length,
@@ -108,14 +108,11 @@ export function createPackageSyncListr(args?: {
 	};
 }
 
-
-
 interface IRsyncResult {
 	err: Error;
 	code: number;
 	cmd: string;
 }
-
 
 function rsyncExecute(rsync: any): Promise<IRsyncResult> {
 	return new Promise<IRsyncResult>((resolve, reject) => {
@@ -129,11 +126,9 @@ function rsyncExecute(rsync: any): Promise<IRsyncResult> {
 	});
 }
 
-
-
 async function copyModule(
-	from: { name: string, path: string },
-	to: { name: string, path: string },
+	from: { name: string; path: string },
+	to: { name: string; path: string },
 ) {
 	const IGNORE = [
 		'node_modules',
@@ -163,27 +158,31 @@ async function copyModule(
 function containsPackage(name: string, target: constants.IPackageObject) {
 	const dependenciesSafe = target.package.dependencies || {};
 	const devDependenciesSafe = target.package.devDependencies || {};
-	return (
-		name in (dependenciesSafe)
-		|| name in (devDependenciesSafe)
-	);
+	return name in dependenciesSafe || name in devDependenciesSafe;
 }
 
-export function getNewPackageObject(source: constants.IPackageObject, target: constants.IPackageObject) {
-	if (!containsPackage(source.name, target)) { return target.package; }
+export function getNewPackageObject(
+	source: constants.IPackageObject,
+	target: constants.IPackageObject,
+) {
+	if (!containsPackage(source.name, target)) {
+		return target.package;
+	}
 	const dependencies = target.package.dependencies || {};
 	const devDepenencies = target.package.devDependencies || {};
 
 	// Setup initial conditions.
 	const sourceVersion = source.package.version;
-	const dependencyLocation: 'dependencies' | 'devDependencies' = source.name in dependencies
-		? 'dependencies'
-		: 'devDependencies';
+	const dependencyLocation: 'dependencies' | 'devDependencies' =
+		source.name in dependencies ? 'dependencies' : 'devDependencies';
 
-	const dependencyObjectContainingSource = (target.package[dependencyLocation] || {});
+	const dependencyObjectContainingSource =
+		target.package[dependencyLocation] || {};
 
 	const targetVersion = dependencyObjectContainingSource[source.name];
-	if (targetVersion === sourceVersion) { return target.package; }
+	if (targetVersion === sourceVersion) {
+		return target.package;
+	}
 
 	// Update the version on the target package.
 	const targetPackage = R.clone(target.package);
@@ -195,11 +194,13 @@ export function getNewPackageObject(source: constants.IPackageObject, target: co
 /**
  * Updates the dependency version of the target with the given source package.
  */
-function syncPackageVersion(source: constants.IPackageObject, target: constants.IPackageObject): boolean {
+function syncPackageVersion(
+	source: constants.IPackageObject,
+	target: constants.IPackageObject,
+): boolean {
 	// Make sure that the package objects are up-to-date.
 	source = refreshPackage(source);
 	target = refreshPackage(target);
-
 
 	const newPackageObject = getNewPackageObject(source, target);
 

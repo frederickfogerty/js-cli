@@ -1,1 +1,1 @@
-export { default as log } from 'js-util-log'
+export { default as log } from 'js-util-log';

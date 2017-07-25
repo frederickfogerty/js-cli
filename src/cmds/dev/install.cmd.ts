@@ -12,8 +12,9 @@ export async function cmd(args: { params: string[] }) {
 
 	const cmd = config.USE_YARN ? 'yarn' : 'npm i';
 
-	const modules = getModulesFromParams(args.params)
-		.toPackageObjects();
+	const modules = getModulesFromParams(args.params).toPackageObjects();
 
-	await run.execOn(modules, cmd, { isConcurrent: true, exitOnError: false }).listr.run();
+	await run
+		.execOn(modules, cmd, { isConcurrent: true, exitOnError: false })
+		.listr.run();
 }

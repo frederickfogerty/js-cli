@@ -6,37 +6,41 @@ export const alias = 'r';
 export const description = 'Run the given command on all modules.';
 export const args = {
 	'[script]': 'The name of the NPM script to run',
-	'--test, -t': 'Flag indicating if a test run should be performed (default: false).',
+	'--test, -t':
+		'Flag indicating if a test run should be performed (default: false).',
 };
 
-
-
-export async function cmd(
-	args: {
-		params: string[],
-		options: {
-			test?: boolean, t?: boolean;
-		},
-	},
-) {
-
+export async function cmd(args: {
+	params: string[];
+	options: {
+		test?: boolean;
+		t?: boolean;
+	};
+}) {
 	// Setup initial conditions.
 	const startedAt = time.timer();
 	const isTest = args.options.test || args.options.t || false;
 
 	const formatScript = (text: string): string => {
 		switch (text.trim()) {
-			case 'l': return 'lint';
-			case 'b': return 'build';
-			case 'pp': return 'prepublish';
-			case 'npp': return 'prepublish';
-			default: return text;
+			case 'l':
+				return 'lint';
+			case 'b':
+				return 'build';
+			case 'pp':
+				return 'prepublish';
+			case 'npp':
+				return 'prepublish';
+			default:
+				return text;
 		}
 	};
 
 	// Determine the script to run.
 	const script = formatScript(args.params.join(' '));
-	const isScriptName = !(script.startsWith('npm ') || script.startsWith('yarn '));
+	const isScriptName = !(
+		script.startsWith('npm ') || script.startsWith('yarn ')
+	);
 	const cmd = isScriptName ? `yarn run ${script}` : script;
 	if (R.isEmpty(script)) {
 		log.error('Please specify a yarn script to run.\n');
@@ -45,10 +49,9 @@ export async function cmd(
 	printTitle(`Running ${log.magenta(cmd)}`);
 
 	// Retrieve the list of modules that have tests.
-	const modules = constants
-		.MODULE_DIRS
+	const modules = constants.MODULE_DIRS
 		.toPackageObjects()
-		.filter((pkg) => isScriptName ? pkg.hasScript(script) : true);
+		.filter(pkg => (isScriptName ? pkg.hasScript(script) : true));
 	await run.execOn(modules, cmd, { isConcurrent: true }).listr.run();
 
 	if (modules.length === 0) {

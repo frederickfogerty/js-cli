@@ -1,12 +1,12 @@
 import { IS_TTY } from '../constants';
 import * as env from './env';
 import http from './http';
-export { IResponse, IHttpHeaders } from './http'
+export { IResponse, IHttpHeaders } from './http';
 
-export { env, http }
-export { log } from './log'
-export * from './exec'
-export * from './execa'
+export { env, http };
+export { log } from './log';
+export * from './exec';
+export * from './execa';
 
 import * as moment from 'moment';
 import * as pluralize from 'pluralize';
@@ -15,16 +15,18 @@ import * as Listr from 'listr';
 import * as fuzzy from 'fuzzy';
 
 import { log } from './log';
-export { moment, pluralize, constants }
+export { moment, pluralize, constants };
 
-
-
-export function listr(tasks?: Listr.IListrTask[], options: Listr.IListrOptions = {}): Listr {
-	if (options.renderer == null) { options.renderer = IS_TTY ? 'update' : 'verbose'; };
+export function listr(
+	tasks?: Listr.IListrTask[],
+	options: Listr.IListrOptions = {},
+): Listr {
+	if (options.renderer == null) {
+		options.renderer = IS_TTY ? 'update' : 'verbose';
+	}
 	return new Listr(tasks, options);
 }
-export { Listr }
-
+export { Listr };
 
 /**
  * Strips a path to start at the project root.
@@ -34,8 +36,6 @@ export function projectPath(path: string) {
 	return path.substr(constants.ROOT_DIR.length, path.length);
 }
 
-
-
 /**
  * Common styling for a command title.
  */
@@ -44,11 +44,7 @@ export function printTitle(title: string) {
 -----------------------------------------------------------------------------------------
  ${title}
 -----------------------------------------------------------------------------------------`);
-};
-
-
-
-
+}
 
 /**
  * Determine if a word loosley matches the given pattern.

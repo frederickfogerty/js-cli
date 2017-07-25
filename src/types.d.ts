@@ -9,8 +9,6 @@ declare module 'toposort' {
 	export = Toposort;
 }
 
-
-
 declare module 'execa' {
 	const execa: any;
 	export = execa;
@@ -24,16 +22,13 @@ declare module 'pad-right' {
 	export = PadRight;
 }
 
-
-
-
 declare module 'listr' {
 	import { Observable } from 'rxjs/Rx';
 
 	namespace Listr {
 		interface IListrTask {
 			title: string;
-			task: () => (Promise<any> | Listr | Observable<any>);
+			task: () => Promise<any> | Listr | Observable<any>;
 			skip?: Function;
 		}
 		interface ICustomRenderer {
@@ -48,15 +43,15 @@ declare module 'listr' {
 		}
 	}
 	class Listr {
-		public constructor(tasks?: Listr.IListrTask[], options?: Listr.IListrOptions);
+		public constructor(
+			tasks?: Listr.IListrTask[],
+			options?: Listr.IListrOptions,
+		);
 		public run(): Promise<void>;
-		public add(task: IListrTask): Listr
+		public add(task: IListrTask): Listr;
 	}
 	export = Listr;
 }
-
-
-
 
 declare module 'fuzzy' {
 	export interface IOptions {
@@ -76,7 +71,5 @@ declare module 'fuzzy' {
 	const fuzzy: IFuzzy;
 	export = fuzzy;
 }
-
-
 
 declare module 'updeep';

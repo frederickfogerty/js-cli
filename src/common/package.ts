@@ -14,7 +14,10 @@ const CORE_SCRIPTS = ['install', 'i'];
  * 	- npm i
  * 	- yarn i
  */
-export function hasScript(script: string, pkg: { scripts?: { [k: string]: string } }) {
+export function hasScript(
+	script: string,
+	pkg: { scripts?: { [k: string]: string } },
+) {
 	const scriptStripped = script
 		.replace('npm run', '')
 		.replace('yarn run', '')
@@ -22,7 +25,9 @@ export function hasScript(script: string, pkg: { scripts?: { [k: string]: string
 		.replace('yarn', '')
 		.trim();
 
-	if (CORE_SCRIPTS.includes(scriptStripped)) { return true; }
+	if (CORE_SCRIPTS.includes(scriptStripped)) {
+		return true;
+	}
 	return (pkg.scripts && pkg.scripts[scriptStripped]) != null;
 }
 
@@ -46,4 +51,3 @@ export function pathToPackageObject(path: string) {
 export function refreshPackage(packageObject: IPackageObject) {
 	return pathToPackageObject(packageObject.path);
 }
-

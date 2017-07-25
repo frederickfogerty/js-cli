@@ -14,26 +14,33 @@ const CONFIG_FILES = ['js-cli-config.js', 'cli.config.js'];
 async function checkDirIsRoot(path: string) {
 	const files = await fse.readdirAsync(path);
 	let found = false;
-	files.forEach((file) => {
-		if (CONFIG_FILES.includes(file)) { found = true; }
+	files.forEach(file => {
+		if (CONFIG_FILES.includes(file)) {
+			found = true;
+		}
 	});
 
 	return found;
-
 }
 
 async function findRootDir() {
 	let dirPath = process.cwd();
 	while (dirPath !== '/') {
 		const isRoot = await checkDirIsRoot(dirPath);
-		if (isRoot) { return dirPath; }
+		if (isRoot) {
+			return dirPath;
+		}
 
 		dirPath = path.join(dirPath, '../');
 	}
 
-	const configFilesString = CONFIG_FILES.map((config) => `'${config}'`).join(' or ');
+	const configFilesString = CONFIG_FILES.map(config => `'${config}'`).join(
+		' or ',
+	);
 
-	throw new Error(`Root directory not found. Have you created a ${configFilesString} file in the root of your project?`);
+	throw new Error(
+		`Root directory not found. Have you created a ${configFilesString} file in the root of your project?`,
+	);
 }
 
 const DEFAULT_SCRIPT_DIRS = path.join(__dirname, '../cmds/**');
@@ -69,7 +76,7 @@ export default config;
 
 function getProjectConfig() {
 	let projectConfig = {};
-	CONFIG_FILES.forEach((configFile) => {
+	CONFIG_FILES.forEach(configFile => {
 		try {
 			const path = fsPath.join(config.ROOT_DIR, configFile);
 			projectConfig = require(path);
@@ -96,8 +103,9 @@ export async function init() {
 			envFile = path.resolve(config.ROOT_DIR, envFile);
 		}
 		const dotenvConfig = dotenv.config({ path: envFile });
-		if (!dotenvConfig) { return; }
+		if (!dotenvConfig) {
+			return;
+		}
 		Object.assign(config, dotenvConfig);
 	});
 }
-

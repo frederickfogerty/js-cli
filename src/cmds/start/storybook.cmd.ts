@@ -16,8 +16,8 @@ export const description = 'Starts React Storybook.';
 
 export async function cmd(args: {
 	options: {
-		noAuth: boolean,
-	},
+		noAuth: boolean;
+	};
 }) {
 	printTitle('StoryBook: Client Module');
 	const path = fsPath.join(constants.LIBS_DIR, 'client');
@@ -29,7 +29,9 @@ export async function cmd(args: {
 	}
 
 	let cmd: string = '';
-	if (authToken) { cmd += `export STORYBOOK_ID_TOKEN=${authToken} && `; }
+	if (authToken) {
+		cmd += `export STORYBOOK_ID_TOKEN=${authToken} && `;
+	}
 	cmd += `cd ${path} && yarn run ui`;
 
 	log.info.green(cmd);
@@ -37,11 +39,10 @@ export async function cmd(args: {
 	await execAsync(cmd);
 }
 
-
 function cleanDebugLog(folder: string) {
 	fs
 		.readdirSync(folder)
-		.filter((name) => name.startsWith('npm-debug.log'))
-		.map((name) => fsPath.join(folder, name))
-		.forEach((path) => fs.removeSync(path));
+		.filter(name => name.startsWith('npm-debug.log'))
+		.map(name => fsPath.join(folder, name))
+		.forEach(path => fs.removeSync(path));
 }

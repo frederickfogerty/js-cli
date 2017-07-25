@@ -11,9 +11,8 @@ export interface IResponse<T> {
 }
 
 export interface IHttpHeaders {
-	[ id: string ]: string;
+	[id: string]: string;
 }
-
 
 async function request<T>(
 	method: HttpMethod,
@@ -45,21 +44,31 @@ async function request<T>(
 	return result;
 }
 
-
-
 function get<T>(url: string, headers?: IHttpHeaders): Promise<IResponse<T>> {
 	return request<T>('GET', url, undefined, headers);
 }
 
-function put<T>(url: string, data?: Object, headers?: IHttpHeaders): Promise<IResponse<T>> {
+function put<T>(
+	url: string,
+	data?: Object,
+	headers?: IHttpHeaders,
+): Promise<IResponse<T>> {
 	return request<T>('PUT', url, data, headers);
 }
 
-function post<T>(url: string, data?: Object, headers?: IHttpHeaders): Promise<IResponse<T>> {
+function post<T>(
+	url: string,
+	data?: Object,
+	headers?: IHttpHeaders,
+): Promise<IResponse<T>> {
 	return request<T>('POST', url, data, headers);
 }
 
-function patch<T>(url: string, data?: Object, headers?: IHttpHeaders): Promise<IResponse<T>> {
+function patch<T>(
+	url: string,
+	data?: Object,
+	headers?: IHttpHeaders,
+): Promise<IResponse<T>> {
 	return request<T>('PATCH', url, data, headers);
 }
 
@@ -67,28 +76,20 @@ function del<T>(url: string, headers?: IHttpHeaders): Promise<IResponse<T>> {
 	return request<T>('DELETE', url, undefined, headers);
 }
 
-
 function headers(httpHeaders: IHttpHeaders) {
 	return {
 		get: <T>(url: string): Promise<IResponse<T>> => get<T>(url, httpHeaders),
-		put: <T>(url: string, data?: Object): Promise<IResponse<T>> => put<T>(url, data, httpHeaders),
-		post: <T>(url: string, data?: Object): Promise<IResponse<T>> => post<T>(url, data, httpHeaders),
-		patch: <T>(url: string, data?: Object): Promise<IResponse<T>> => patch<T>(url, data, httpHeaders),
+		put: <T>(url: string, data?: Object): Promise<IResponse<T>> =>
+			put<T>(url, data, httpHeaders),
+		post: <T>(url: string, data?: Object): Promise<IResponse<T>> =>
+			post<T>(url, data, httpHeaders),
+		patch: <T>(url: string, data?: Object): Promise<IResponse<T>> =>
+			patch<T>(url, data, httpHeaders),
 		delete: <T>(url: string): Promise<IResponse<T>> => del<T>(url, httpHeaders),
-		headers: (append: IHttpHeaders) => headers(Object.assign(httpHeaders, append)),
+		headers: (append: IHttpHeaders) =>
+			headers(Object.assign(httpHeaders, append)),
 	};
 }
 
-
-export {
-	get,
-	put,
-	post,
-	patch,
-	del as delete,
-	headers,
-}
+export { get, put, post, patch, del as delete, headers };
 export default { get, put, post, patch, delete: del, headers };
-
-
-

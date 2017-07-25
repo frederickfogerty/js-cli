@@ -1,17 +1,8 @@
 import { execaCommand } from './util/execa';
-import {
-	constants,
-	execAsync,
-	exec,
-	exec$,
-	execa,
-	listr,
-	Listr,
-} from './util';
+import { constants, execAsync, exec, exec$, execa, listr, Listr } from './util';
 import * as deps from './deps';
-export { exec, execAsync, exec$ }
+export { exec, execAsync, exec$ };
 import { R, fsPath } from './libs';
-
 
 export interface IExecOnModulesResult {
 	success: constants.IPackageObject[];
@@ -26,7 +17,7 @@ function createTask(
 	pkg: constants.IPackageObject,
 	commandOrTask: ScriptOrTask,
 	opts: { promise?: boolean } = {},
-): { title: string, task: () => any } {
+): { title: string; task: () => any } {
 	if (isTask(commandOrTask)) {
 		return commandOrTask as Task;
 	}
@@ -34,25 +25,27 @@ function createTask(
 
 	return {
 		title: command,
-		task: () => execaCommand(command as string, { cwd: pkg.path, promise: opts.promise }),
+		task: () =>
+			execaCommand(command as string, { cwd: pkg.path, promise: opts.promise }),
 	};
 }
 
-function createTasks(pkg: constants.IPackageObject, commands: ScriptOrTask[], opts: { promise?: boolean } = {}) {
-	const tasks = commands.map((command) => createTask(pkg, command, opts));
+function createTasks(
+	pkg: constants.IPackageObject,
+	commands: ScriptOrTask[],
+	opts: { promise?: boolean } = {},
+) {
+	const tasks = commands.map(command => createTask(pkg, command, opts));
 	return tasks;
-};
-
+}
 
 /**
  * Executes the given command on a set of modules.
  */
 export function execOn(
-
 	modules: constants.IPackageObject[],
 	commands: string | string[],
 	options?: IExecOnModulesOptions,
-
 ): { listr: Listr } {
 	const commandsArray = Array.isArray(commands) ? commands : [commands];
 
@@ -66,7 +59,7 @@ export function execOn(
 	const execShouldBePromise = !exitOnError;
 
 	// Run the command on each module.
-	const tasks = modules.map((pkg) => ({
+	const tasks = modules.map(pkg => ({
 		title: pkg.name,
 		task: () => listr(createTasks(pkg, commandsArray, { promise: true })),
 	}));
@@ -76,20 +69,19 @@ export function execOn(
 			exitOnError, // needs to default to true if undefined
 		}),
 	};
-
 }
-
 
 function makeScript(scriptOrTask: ScriptOrTask): ScriptOrTask {
-	if (isTask(scriptOrTask)) { return scriptOrTask; }
+	if (isTask(scriptOrTask)) {
+		return scriptOrTask;
+	}
 	const script: string = scriptOrTask as string;
-	return (script.includes('yarn') || script.includes('npm')) // Check if already an npm command
-		? script :
-		`yarn run ${script}`;
+	return script.includes('yarn') || script.includes('npm') // Check if already an npm command
+		? script
+		: `yarn run ${script}`;
 }
 
-
-type Task = { title: string, task: (() => Promise<any> | Listr) };
+type Task = { title: string; task: (() => Promise<any> | Listr) };
 type ScriptOrTask = string | Task;
 const isTask = (task: ScriptOrTask) => !(typeof task === 'string');
 
@@ -98,22 +90,25 @@ const isTask = (task: ScriptOrTask) => !(typeof task === 'string');
  * E.g. if the script is 'build', modules which don't have a "build" script defined will not be executed.
  */
 export function execOnIfScriptExists(
-
 	modules: constants.IPackageObject[],
 	scripts: ScriptOrTask | ScriptOrTask[],
 	options: IExecOnModulesOptions = { isConcurrent: true },
-
 ) {
 	const scriptsArray = Array.isArray(scripts) ? scripts : [scripts];
 
-	const tasks = modules.map((module) => {
-		const availableScripts: ScriptOrTask[] = scriptsArray
-			.filter((script) => isTask(script) ? true : module.hasScript(script as string));
-		if (availableScripts.length === 0) { return null; }
+	const tasks = modules.map(module => {
+		const availableScripts: ScriptOrTask[] = scriptsArray.filter(
+			script => (isTask(script) ? true : module.hasScript(script as string)),
+		);
+		if (availableScripts.length === 0) {
+			return null;
+		}
 
 		const scriptCommands = availableScripts.map(makeScript);
 		const tasks = createTasks(module, scriptCommands);
-		if (!tasks) { return null; }
+		if (!tasks) {
+			return null;
+		}
 
 		return {
 			title: module.name,
@@ -130,13 +125,10 @@ export function execOnIfScriptExists(
 	};
 }
 
-
-
 /**
  * Opens a new tab in iTerm and executes the given command.
  */
 export function execInNewTab(cmd: string, path: string = '') {
-
 	// Ensure path is fully-qualified.
 	if (!path.startsWith(constants.ROOT_DIR)) {
 		path = fsPath.join(constants.ROOT_DIR, path);

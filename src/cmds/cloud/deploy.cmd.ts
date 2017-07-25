@@ -13,35 +13,34 @@ import {
 	prompt,
 } from '../../common';
 
-
 export const group = 'cloud';
 export const name = 'deploy';
 export const alias = 'd';
 export const description = 'Deploys a module to the cloud.';
 export const args = {
-	'[module name]': 'The name (or partial name) of one or more modules to deploy',
+	'[module name]':
+		'The name (or partial name) of one or more modules to deploy',
 	'--test, -t': 'Test the deploy settings without starting it.',
 };
 
-
-export async function cmd(
-	args: {
-		params: string[],
-		options: {
-			test?: boolean, t?: boolean,
-		},
-	},
-) {
+export async function cmd(args: {
+	params: string[];
+	options: {
+		test?: boolean;
+		t?: boolean;
+	};
+}) {
 	// Setup initial conditions.
 	printTitle('Deploy');
 	const isTest = args.options.test || args.options.t || false;
-
 
 	// Retrieve the list of modules to deploy.
 	const modules = await selectedModules(args.params);
 	if (modules.length === 0) {
 		log.info.yellow('Deployment not started. Mo module was specified.');
-		log.info.yellow('Pass the name of one or more modules, or nothing to select from a list.');
+		log.info.yellow(
+			'Pass the name of one or more modules, or nothing to select from a list.',
+		);
 		log.info();
 		return;
 	}
@@ -51,21 +50,20 @@ export async function cmd(
 	await deployPackages(modules, { isConcurrent: true }).run();
 }
 
-
 /**
  * Deploy a list of packages
  */
 export function deployPackages(
-
 	packages: constants.IPackageObject[],
 	opts: { isConcurrent?: boolean } = { isConcurrent: false },
-
 ) {
-
-	return listr(packages.map((pkg) => ({
-		title: pkg.name,
-		task: () => deploy(pkg),
-	})), { concurrent: opts.isConcurrent });
+	return listr(
+		packages.map(pkg => ({
+			title: pkg.name,
+			task: () => deploy(pkg),
+		})),
+		{ concurrent: opts.isConcurrent },
+	);
 }
 
 /**
@@ -77,9 +75,7 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 	const isDocker = fs.existsSync(fsPath.join(path, 'Dockerfile'));
 
 	// Build up basic command.
-	let cmd = isDocker
-		? `now --docker`
-		: `now --npm --forward-npm`;
+	let cmd = isDocker ? `now --docker` : `now --npm --forward-npm`;
 
 	cmd += ` --token ${process.env.NOW_TOKEN}`;
 
@@ -97,9 +93,7 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 		const value = vars[key];
 
 		let output = log.gray(`${key}: ${log.green(value)}`);
-		output = i === 0
-			? log.blue(` ENV:  ${output}`)
-			: `       ${output}`;
+		output = i === 0 ? log.blue(` ENV:  ${output}`) : `       ${output}`;
 		log.info(output);
 
 		// Append the environment-variable to the deploy command.
@@ -111,7 +105,9 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 	if (!isTest) {
 		let out: string = 'yarn && ';
 		const packageJsonPath = fsPath.join(pkg.path, 'package.json');
-		if (fs.readJsonSync(packageJsonPath).scripts.prepublish != null) { out += 'npm run prepublish &&'; }
+		if (fs.readJsonSync(packageJsonPath).scripts.prepublish != null) {
+			out += 'npm run prepublish &&';
+		}
 		out += ` ${cmd}`;
 		return execaCommand(out, { cwd: path });
 		// run.execInNewTab(`${out}`, path);
@@ -121,15 +117,12 @@ function deploy(pkg: constants.IPackageObject, isTest?: boolean) {
 	}
 }
 
-
-
-
-async function selectedModules(names: string[]): Promise<constants.IPackageObject[]> {
+async function selectedModules(
+	names: string[],
+): Promise<constants.IPackageObject[]> {
 	names = R.reject(R.isEmpty, names);
 	const promptForModule = async () => {
-		const modules = constants
-			.SERVICE_MODULE_DIRS
-			.toPackageObjects();
+		const modules = constants.SERVICE_MODULE_DIRS.toPackageObjects();
 		return await prompt.forModule(modules);
 	};
 
@@ -138,25 +131,28 @@ async function selectedModules(names: string[]): Promise<constants.IPackageObjec
 		const pkgs = await promptForModule();
 		return pkgs;
 	} else {
-
 		// Look for modules that match the name (or partial names) provided as CLI arguments.
-		let result = matchModules(constants.SERVICE_MODULE_DIRS.toPackageObjects(), names);
+		let result = matchModules(
+			constants.SERVICE_MODULE_DIRS.toPackageObjects(),
+			names,
+		);
 		if (result.length === 0) {
 			result = await promptForModule(); // No matching name was specified - prompt the user to select one.
 		}
 		return result;
-
 	}
 }
-
 
 /**
  * Look for modules that match the name (or partial names) provided as CLI arguments.
  */
-function matchModules(pkgs: constants.IPackageObject[], names: string[]): constants.IPackageObject[] {
-	const isModuleMatch = (name: string) => names.find((pattern) => isFuzzyMatch(pattern, name)) !== undefined;
-	return constants
-		.SERVICE_MODULE_DIRS
+function matchModules(
+	pkgs: constants.IPackageObject[],
+	names: string[],
+): constants.IPackageObject[] {
+	const isModuleMatch = (name: string) =>
+		names.find(pattern => isFuzzyMatch(pattern, name)) !== undefined;
+	return constants.SERVICE_MODULE_DIRS
 		.toPackageObjects()
-		.filter((pkg) => isModuleMatch(pkg.name));
+		.filter(pkg => isModuleMatch(pkg.name));
 }
