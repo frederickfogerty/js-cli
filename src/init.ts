@@ -2,18 +2,23 @@ import * as path from 'path';
 import { log } from './common/util/log';
 
 // NOTE: event name is camelCase as per node convention
-process.on('unhandledRejection', function(reason: Error, promise: Promise<any>) {
+process.on('unhandledRejection', function(
+	reason: Error,
+	promise: Promise<any>,
+) {
 	log.error.red(reason);
 	process.exit(1);
 });
-
 
 import config from './common/config';
 import cli from 'command-interface';
 import * as minimist from 'minimist';
 
 function checkVersionFlag() {
-	const argv: { version?: boolean, v?: boolean } = minimist(process.argv.slice(1));
+	const argv = minimist(process.argv.slice(1)) as {
+		version?: boolean;
+		v?: boolean;
+	};
 	return argv.version || argv.v;
 }
 
@@ -29,4 +34,3 @@ async function init(cb: Function) {
 
 // Passing a callback to stop node exiting early
 init(() => null);
-
